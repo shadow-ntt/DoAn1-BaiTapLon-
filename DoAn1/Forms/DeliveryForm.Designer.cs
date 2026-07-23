@@ -46,8 +46,8 @@
             lblActualDeliveryDate = new Label();
             txtDeliveryStatus = new TextBox();
             lblDeliveryStatus = new Label();
-            txtInvoiceId = new TextBox();
-            lblInvoiceId = new Label();
+            txtInvoiceDate = new TextBox();
+            lblInvoiceDate = new Label();
             txtExpectedDate = new TextBox();
             lblExpectedDate = new Label();
             txtAddress = new TextBox();
@@ -363,8 +363,8 @@
             pnlDetails.Controls.Add(lblActualDeliveryDate);
             pnlDetails.Controls.Add(txtDeliveryStatus);
             pnlDetails.Controls.Add(lblDeliveryStatus);
-            pnlDetails.Controls.Add(txtInvoiceId);
-            pnlDetails.Controls.Add(lblInvoiceId);
+            pnlDetails.Controls.Add(txtInvoiceDate);
+            pnlDetails.Controls.Add(lblInvoiceDate);
             pnlDetails.Controls.Add(txtExpectedDate);
             pnlDetails.Controls.Add(lblExpectedDate);
             pnlDetails.Controls.Add(txtAddress);
@@ -441,24 +441,24 @@
             lblDeliveryStatus.TabIndex = 11;
             lblDeliveryStatus.Text = "Trạng thái:";
             // 
-            // txtInvoiceId
+            // txtInvoiceDate
             // 
-            txtInvoiceId.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtInvoiceId.Location = new Point(180, 344);
-            txtInvoiceId.Margin = new Padding(3, 4, 3, 4);
-            txtInvoiceId.Name = "txtInvoiceId";
-            txtInvoiceId.ReadOnly = true;
-            txtInvoiceId.Size = new Size(545, 31);
-            txtInvoiceId.TabIndex = 10;
+            txtInvoiceDate.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtInvoiceDate.Location = new Point(180, 344);
+            txtInvoiceDate.Margin = new Padding(3, 4, 3, 4);
+            txtInvoiceDate.Name = "txtInvoiceDate";
+            txtInvoiceDate.ReadOnly = true;
+            txtInvoiceDate.Size = new Size(545, 31);
+            txtInvoiceDate.TabIndex = 10;
             // 
-            // lblInvoiceId
+            // lblInvoiceDate
             // 
-            lblInvoiceId.AutoSize = true;
-            lblInvoiceId.Location = new Point(20, 350);
-            lblInvoiceId.Name = "lblInvoiceId";
-            lblInvoiceId.Size = new Size(113, 25);
-            lblInvoiceId.TabIndex = 9;
-            lblInvoiceId.Text = "Mã hóa đơn:";
+            lblInvoiceDate.AutoSize = true;
+            lblInvoiceDate.Location = new Point(20, 350);
+            lblInvoiceDate.Name = "lblInvoiceDate";
+            lblInvoiceDate.Size = new Size(168, 25);
+            lblInvoiceDate.TabIndex = 9;
+            lblInvoiceDate.Text = "Ngày lập hóa đơn:";
             // 
             // txtExpectedDate
             // 
@@ -622,8 +622,8 @@
         private System.Windows.Forms.TextBox txtAddress;
         private System.Windows.Forms.Label lblExpectedDate;
         private System.Windows.Forms.TextBox txtExpectedDate;
-        private System.Windows.Forms.Label lblInvoiceId;
-        private System.Windows.Forms.TextBox txtInvoiceId;
+        private System.Windows.Forms.Label lblInvoiceDate;
+        private System.Windows.Forms.TextBox txtInvoiceDate;
 
         // Các Control bổ sung thêm cho Lịch sử / Chi tiết đơn
         private System.Windows.Forms.Label lblDeliveryStatus;

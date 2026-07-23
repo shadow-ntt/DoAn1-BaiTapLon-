@@ -1,23 +1,23 @@
-﻿using System;
+﻿using DoAn1.Models.Tables;
+using DoAn1.Models.Views;
+using DoAn1.Services;
+using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using DoAn1.Models.Tables;
-using DoAn1.Services;
 
 namespace DoAn1.Forms
 {
     public partial class DeliveryForm : Form
     {
         private readonly DeliveryService _deliveryService;
-        private readonly int _currentEmployeeId; // ID nhân viên đăng nhập hiện tại
+        private readonly int _currentEmployeeId;
 
         private List<Order> _pendingOrders;
         private List<Delivery> _deliveringOrders;
         private Order _selectedOrder;
 
-        public DeliveryForm(int currentEmployeeId = -1) // Mặc định ID = -1 nếu chưa truyền từ Login
+        public DeliveryForm(int currentEmployeeId = -1)
         {
             InitializeComponent();
             _deliveryService = new DeliveryService();
@@ -28,24 +28,22 @@ namespace DoAn1.Forms
         private void InitEvents()
         {
             this.Load += DeliveryForm_Load;
-
-            // Bắt sự kiện khi chuyển Tab
             tabControlDelivery.SelectedIndexChanged += TabControlDelivery_SelectedIndexChanged;
 
-            // Events cho Tab 1: Đơn chờ giao
+            // Tab 1
             txtSearchPending.TextChanged += (s, e) => LoadPendingOrders();
             btnRefreshPending.Click += BtnRefreshPending_Click;
             lstPendingOrders.SelectedIndexChanged += LstPendingOrders_SelectedIndexChanged;
             btnStartDelivery.Click += BtnStartDelivery_Click;
 
-            // Events cho Tab 2: Đơn đang giao
+            // Tab 2
             txtSearchDelivering.TextChanged += (s, e) => LoadDeliveringOrders();
             btnRefreshDelivering.Click += BtnRefreshDelivering_Click;
             lstDeliveringOrders.SelectedIndexChanged += LstDeliveringOrders_SelectedIndexChanged;
             btnConfirmSuccess.Click += BtnConfirmSuccess_Click;
             btnConfirmReturn.Click += BtnConfirmReturn_Click;
 
-            // Events cho Tab 3: Lịch sử giao hàng
+            // Tab 3
             txtSearchHistory.TextChanged += (s, e) => LoadDeliveryHistory();
             btnRefreshHistory.Click += BtnRefreshHistory_Click;
             dgvDeliveryHistory.SelectionChanged += DgvDeliveryHistory_SelectionChanged;
@@ -61,15 +59,9 @@ namespace DoAn1.Forms
             ClearForm();
             switch (tabControlDelivery.SelectedIndex)
             {
-                case 0:
-                    LoadPendingOrders();
-                    break;
-                case 1:
-                    LoadDeliveringOrders();
-                    break;
-                case 2:
-                    LoadDeliveryHistory();
-                    break;
+                case 0: LoadPendingOrders(); break;
+                case 1: LoadDeliveringOrders(); break;
+                case 2: LoadDeliveryHistory(); break;
             }
         }
 
@@ -94,7 +86,7 @@ namespace DoAn1.Forms
                 {
                     var displayList = _pendingOrders.Select(o => new {
                         OrderData = o,
-                        DisplayText = $"[ORD-{o.OrderId}] — Khách: {(o.Customer != null ? o.Customer.FullName : "Khách lẻ")}"
+                        DisplayText = $"[ORD-{o.OrderId}] — Khách: {o.Customer?.FullName ?? "Khách lẻ"}"
                     }).ToList();
 
                     lstPendingOrders.DataSource = displayList;
@@ -120,8 +112,8 @@ namespace DoAn1.Forms
                 return;
             }
 
-            dynamic selectedItem = lstPendingOrders.SelectedItem;
-            _selectedOrder = selectedItem.OrderData as Order;
+            var selectedItem = lstPendingOrders.SelectedItem as dynamic;
+            _selectedOrder = selectedItem?.OrderData as Order;
             DisplayOrderDetails(_selectedOrder, "Chờ giao");
         }
 
@@ -141,10 +133,9 @@ namespace DoAn1.Forms
 
             if (confirm == DialogResult.Yes)
             {
-                bool success = _deliveryService.StartDelivery(_selectedOrder.OrderId, _currentEmployeeId);
-                if (success)
+                if (_deliveryService.StartDelivery(_selectedOrder.OrderId, _currentEmployeeId))
                 {
-                    MessageBox.Show("Đã nhận đơn thành công! Đơn hàng đã được chuyển sang danh sách Đang giao.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Đã nhận đơn thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     LoadPendingOrders();
                 }
                 else
@@ -177,7 +168,7 @@ namespace DoAn1.Forms
                 {
                     var displayList = _deliveringOrders.Select(d => new {
                         DeliveryData = d,
-                        DisplayText = $"[ORD-{d.OrderId}] — Khách: {(d.Order.Customer != null ? d.Order.Customer.FullName : "Khách lẻ")}"
+                        DisplayText = $"[ORD-{d.OrderId}] — Khách: {d.Order?.Customer?.FullName ?? "Khách lẻ"}"
                     }).ToList();
 
                     lstDeliveringOrders.DataSource = displayList;
@@ -203,8 +194,8 @@ namespace DoAn1.Forms
                 return;
             }
 
-            dynamic selectedItem = lstDeliveringOrders.SelectedItem;
-            Delivery delivery = selectedItem.DeliveryData as Delivery;
+            var selectedItem = lstDeliveringOrders.SelectedItem as dynamic;
+            Delivery delivery = selectedItem?.DeliveryData as Delivery;
             _selectedOrder = delivery?.Order;
             DisplayOrderDetails(_selectedOrder, "Đang giao");
         }
@@ -225,10 +216,9 @@ namespace DoAn1.Forms
 
             if (confirm == DialogResult.Yes)
             {
-                bool success = _deliveryService.ConfirmDeliverySuccess(_selectedOrder.OrderId);
-                if (success)
+                if (_deliveryService.ConfirmDeliverySuccess(_selectedOrder.OrderId))
                 {
-                    MessageBox.Show("Đã xác nhận giao hàng thành công và ghi nhận doanh thu!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Đã xác nhận giao hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     LoadDeliveringOrders();
                 }
                 else
@@ -249,30 +239,20 @@ namespace DoAn1.Forms
             string reason = txtReturnReason.Text.Trim();
             if (string.IsNullOrEmpty(reason))
             {
-                MessageBox.Show("Vui lòng nhập lý do trả hàng trước khi xác nhận!", "Yêu cầu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng nhập lý do trả hàng!", "Yêu cầu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtReturnReason.Focus();
                 return;
             }
 
-            var confirm = MessageBox.Show(
-                $"Xác nhận đơn hàng ORD-{_selectedOrder.OrderId} bị trả lại với lý do: '{reason}'?",
-                "Xác nhận trả hàng",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning);
-
-            if (confirm == DialogResult.Yes)
+            if (_deliveryService.ConfirmDeliveryReturn(_selectedOrder.OrderId, reason))
             {
-                bool success = _deliveryService.ConfirmDeliveryReturn(_selectedOrder.OrderId, reason);
-                if (success)
-                {
-                    MessageBox.Show("Đã cập nhật trạng thái đơn hàng bị trả về hệ thống.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    txtReturnReason.Clear();
-                    LoadDeliveringOrders();
-                }
-                else
-                {
-                    MessageBox.Show("Xảy ra lỗi khi xác nhận trả hàng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                MessageBox.Show("Đã cập nhật trạng thái đơn hàng bị trả về hệ thống.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                txtReturnReason.Clear();
+                LoadDeliveringOrders();
+            }
+            else
+            {
+                MessageBox.Show("Xảy ra lỗi khi xác nhận trả hàng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -295,7 +275,7 @@ namespace DoAn1.Forms
                 var historyList = _deliveryService.GetDeliveryHistory(_currentEmployeeId, keyword);
                 dgvDeliveryHistory.DataSource = historyList;
 
-                // Ẩn cột OrderObj khỏi DataGridView nhưng vẫn lưu đối tượng để dùng
+                // Ẩn cột chứa đối tượng Order khỏi Grid
                 if (dgvDeliveryHistory.Columns["OrderObj"] != null)
                 {
                     dgvDeliveryHistory.Columns["OrderObj"].Visible = false;
@@ -307,24 +287,17 @@ namespace DoAn1.Forms
             }
         }
 
-        // Sự kiện xảy ra khi click chọn 1 dòng trong DataGridView Lịch sử giao hàng
         private void DgvDeliveryHistory_SelectionChanged(object sender, EventArgs e)
         {
-            if (dgvDeliveryHistory.CurrentRow == null || dgvDeliveryHistory.CurrentRow.DataBoundItem == null)
+            if (dgvDeliveryHistory.CurrentRow?.DataBoundItem is DeliveryHistoryDTO historyItem)
+            {
+                _selectedOrder = historyItem.OrderObj;
+                DisplayOrderDetails(_selectedOrder, historyItem.StatusText, historyItem.DeliveryDate, historyItem.ReturnReason);
+            }
+            else
             {
                 ClearForm();
-                return;
             }
-
-            dynamic selectedItem = dgvDeliveryHistory.CurrentRow.DataBoundItem;
-            _selectedOrder = selectedItem.OrderObj as Order;
-
-            // Lấy thêm dữ liệu hiển thị trên Grid đẩy sang Panel chi tiết
-            string status = selectedItem.Trạng_Thái;
-            DateTime? deliveryDate = selectedItem.Ngày_Giao;
-            string returnReason = selectedItem.Lý_Do_Trả;
-
-            DisplayOrderDetails(_selectedOrder, status, deliveryDate, returnReason);
         }
 
         #endregion
@@ -344,24 +317,16 @@ namespace DoAn1.Forms
             txtPhone.Text = order.Customer?.PhoneNumber ?? "Chưa có SĐT";
             txtAddress.Text = order.Customer?.Address ?? "Chưa có địa chỉ";
             txtExpectedDate.Text = order.ExpectedDeliveryDate.ToString("dd/MM/yyyy");
-            txtInvoiceId.Text = order.Invoice != null ? $"INV-{order.Invoice.InvoiceId}" : "Chưa có";
 
-            // Hiển thị các thông tin nâng cao cho Panel chi tiết
-            txtDeliveryStatus.Text = !string.IsNullOrEmpty(statusText) ? statusText : GetOrderStatusText(order.Status);
+            // 🟢 ĐÃ CẬP NHẬT: Hiển thị Ngày lập hóa đơn
+            txtInvoiceDate.Text = order.Invoice != null
+                ? order.Invoice.InvoiceDate.ToString("dd/MM/yyyy HH:mm")
+                : "Chưa lập hóa đơn";
+
+            // Gọi Helper để lấy văn bản trạng thái nếu chưa truyền vào
+            txtDeliveryStatus.Text = !string.IsNullOrEmpty(statusText) ? statusText : OrderStatusHelper.GetText(order.Status);
             txtActualDeliveryDate.Text = deliveryDate.HasValue ? deliveryDate.Value.ToString("dd/MM/yyyy HH:mm") : "---";
             txtHistoryReturnReason.Text = !string.IsNullOrEmpty(returnReason) ? returnReason : (order.CancelReason ?? "Không có");
-        }
-
-        private string GetOrderStatusText(string status)
-        {
-            switch (status)
-            {
-                case "ReadyDelivery": return "Chờ giao";
-                case "Delivering": return "Đang giao";
-                case "Completed": return "Giao thành công";
-                case "Returned": return "Trả hàng";
-                default: return status ?? "Chưa xác định";
-            }
         }
 
         private void ClearForm()
@@ -372,9 +337,7 @@ namespace DoAn1.Forms
             txtPhone.Clear();
             txtAddress.Clear();
             txtExpectedDate.Clear();
-            txtInvoiceId.Clear();
-
-            // Clear thêm các field mới
+            txtInvoiceDate.Clear(); // 🟢 ĐÃ CẬP NHẬT
             txtDeliveryStatus.Clear();
             txtActualDeliveryDate.Clear();
             txtHistoryReturnReason.Clear();

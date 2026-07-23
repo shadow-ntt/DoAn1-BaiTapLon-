@@ -1,16 +1,21 @@
-﻿using DoAn1.Models.Results;
-using DoAn1.Models.Tables;
-using DoAn1.Data;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DoAn1.Data;
+using DoAn1.Models.Results;
+using DoAn1.Models.Tables;
+using DoAn1.Models.Views;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoAn1.Services
 {
+
     public class ProductService
     {
-        // 1. Lấy danh sách sản phẩm (Tìm kiếm)
+        #region TAB 1: Inventory Management (Quản lý tồn kho)
+
+        #region 1.1 Read Operations
+
         public ProcessResult<List<Product>> GetAllProducts(string keyword = "")
         {
             try
@@ -21,7 +26,10 @@ namespace DoAn1.Services
 
                     if (!string.IsNullOrWhiteSpace(keyword))
                     {
-                        query = query.Where(p => p.ProductName.Contains(keyword) || p.Type.Contains(keyword) || p.ProductId.ToString().Equals(keyword) );
+                        keyword = keyword.Trim();
+                        query = query.Where(p => p.ProductName.Contains(keyword)
+                                              || p.Type.Contains(keyword)
+                                              || p.ProductId.ToString().Equals(keyword));
                     }
                     return new ProcessResult<List<Product>> { IsSuccess = true, Data = query.ToList() };
                 }
@@ -32,7 +40,10 @@ namespace DoAn1.Services
             }
         }
 
-        // 2. Nhập hàng mới (Không cần truyền Id vì DB tự tăng)
+        #endregion
+
+        #region 1.2 Write Operations (CRUD)
+
         public ProcessResult<Product> AddProduct(Product newProduct)
         {
             try
@@ -50,7 +61,6 @@ namespace DoAn1.Services
             }
         }
 
-        // 3. Sửa thông tin hàng hóa chuẩn chỉ (Không sửa ID)
         public ProcessResult<Product> UpdateProduct(int id, Product updatedData)
         {
             try
@@ -61,7 +71,6 @@ namespace DoAn1.Services
                     if (product == null)
                         return new ProcessResult<Product> { IsSuccess = false, Message = "Không tìm thấy sản phẩm cần sửa." };
 
-                    // Chỉ sửa các trường thông tin, giữ nguyên PK
                     product.ProductName = updatedData.ProductName;
                     product.Description = updatedData.Description;
                     product.Type = updatedData.Type;
@@ -78,14 +87,12 @@ namespace DoAn1.Services
             }
         }
 
-        // 4. Xóa hàng an toàn (Check ràng buộc lịch sử đơn hàng)
         public ProcessResult<bool> DeleteProduct(int id)
         {
             try
             {
                 using (var db = new AppDbContext())
                 {
-                    // KIỂM TRA RÀNG BUỘC: Nếu đã nằm trong chi tiết đơn hàng thì CẤM XÓA
                     bool hasOrder = db.OrderDetails.Any(od => od.ProductId == id);
                     if (hasOrder)
                     {
@@ -111,5 +118,167 @@ namespace DoAn1.Services
                 return new ProcessResult<bool> { IsSuccess = false, Message = "Lỗi khi xóa: " + ex.Message };
             }
         }
+
+        #endregion
+
+        #endregion
+
+        #region TAB 2: Return Order Approval (Duyệt đơn trả hàng)
+
+        #region 2.1 Read Operations
+
+        public ProcessResult<List<ReturnOrderDTO>> GetReturnOrders(string keyword = "")
+        {
+            try
+            {
+                using (var db = new AppDbContext())
+                {
+                    var query = db.Orders.AsNoTracking()
+                        .Where(o => o.Status == "Returning");
+
+                    if (!string.IsNullOrWhiteSpace(keyword))
+                    {
+                        keyword = keyword.Trim().ToLower();
+                        query = query.Where(o =>
+                            o.OrderId.ToString().Contains(keyword) ||
+                            (o.Customer != null && o.Customer.FullName.ToLower().Contains(keyword)) ||
+                            (o.Invoice != null && o.Invoice.InvoiceId.ToString().Contains(keyword)));
+                    }
+
+                    // Dùng trực tiếp o.Delivery (số ít)
+                    var list = query.Select(o => new ReturnOrderDTO
+                    {
+                        OrderId = o.OrderId,
+                        CustomerName = o.Customer != null ? o.Customer.FullName : "Khách vô danh",
+                        OrderDate = o.OrderDate,
+                        InvoiceDate = o.Invoice != null ? o.Invoice.InvoiceDate : (DateTime?)null, // Cập nhật lấy Ngày lập hóa đơn
+                        Status = o.Status,
+                        // EF Core tự dịch o.Delivery.ReturnReason ra LEFT JOIN SQL COALESCE
+                        ReturnReason = o.Delivery.ReturnReason
+                                       ?? o.CancelReason
+                                       ?? "Không ghi rõ lý do"
+                    })
+                    .OrderByDescending(r => r.OrderId)
+                    .ToList();
+
+                    return new ProcessResult<List<ReturnOrderDTO>>
+                    {
+                        IsSuccess = true,
+                        Data = list
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ProcessResult<List<ReturnOrderDTO>>
+                {
+                    IsSuccess = false,
+                    Message = "Lỗi tải danh sách đơn trả hàng: " + ex.Message
+                };
+            }
+        }
+
+        public ProcessResult<List<ReturnOrderDetailDTO>> GetReturnOrderDetails(int orderId)
+        {
+            try
+            {
+                using (var db = new AppDbContext())
+                {
+                    var details = db.OrderDetails.AsNoTracking()
+                        .Where(od => od.OrderId == orderId)
+                        .Select(od => new ReturnOrderDetailDTO
+                        {
+                            ProductId = od.ProductId,
+                            ProductName = od.Product != null ? od.Product.ProductName : "N/A",
+                            Quantity = od.Quantity,
+                            UnitPrice = od.UnitPrice
+                        })
+                        .ToList();
+
+                    return new ProcessResult<List<ReturnOrderDetailDTO>>
+                    {
+                        IsSuccess = true,
+                        Data = details
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ProcessResult<List<ReturnOrderDetailDTO>>
+                {
+                    IsSuccess = false,
+                    Message = "Lỗi tải chi tiết đơn hàng: " + ex.Message
+                };
+            }
+        }
+
+        #endregion
+
+        #region 2.2 Transaction Operations
+
+        public ProcessResult<bool> ApproveReturnOrder(int orderId)
+        {
+            using (var db = new AppDbContext())
+            {
+                using (var transaction = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        var order = db.Orders
+                            .Include(o => o.OrderDetails)
+                                .ThenInclude(od => od.Product)
+                            .FirstOrDefault(o => o.OrderId == orderId);
+
+                        if (order == null)
+                        {
+                            return new ProcessResult<bool> { IsSuccess = false, Message = "Không tìm thấy đơn hàng!" };
+                        }
+
+                        if (order.Status != "Returning")
+                        {
+                            return new ProcessResult<bool>
+                            {
+                                IsSuccess = false,
+                                Message = $"Đơn hàng đang ở trạng thái [{order.Status}], không thể duyệt trả hàng!"
+                            };
+                        }
+
+                        // Cập nhật tồn kho qua Navigation Property
+                        foreach (var detail in order.OrderDetails)
+                        {
+                            if (detail.Product != null)
+                            {
+                                detail.Product.OpeningQuantity += detail.Quantity;
+                            }
+                        }
+
+                        order.Status = "Returned";
+
+                        db.SaveChanges();
+                        transaction.Commit();
+
+                        return new ProcessResult<bool>
+                        {
+                            IsSuccess = true,
+                            Message = $"Đã duyệt trả hàng thành công cho Đơn #{orderId}. Số lượng đã được cộng lại vào kho!",
+                            Data = true
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return new ProcessResult<bool>
+                        {
+                            IsSuccess = false,
+                            Message = "Lỗi trong quá trình duyệt trả hàng: " + ex.Message
+                        };
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #endregion
     }
 }

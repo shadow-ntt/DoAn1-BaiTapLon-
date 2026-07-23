@@ -1,28 +1,28 @@
-﻿using System;
+﻿using DoAn1.Data;
+using DoAn1.Models.Tables;
+using DoAn1.Models.Views;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using DoAn1.Models.Tables;
-using DoAn1.Data;
 
 namespace DoAn1.Services
 {
     public class DeliveryService
     {
-        // 1. LẤY DANH SÁCH ĐƠN CHỜ GIAO (Có hỗ trợ tìm kiếm)
-        // Điều kiện: Đơn có Status = "ReadyDelivery" (hoặc đã có Hóa đơn nhưng chưa được giao)
+        // 1. LẤY DANH SÁCH ĐƠN CHỜ GIAO
         public List<Order> GetPendingOrders(string keyword = "")
         {
             using (var db = new AppDbContext())
             {
-                var query = db.Orders
+                var query = db.Orders.AsNoTracking()
                     .Include(o => o.Customer)
                     .Include(o => o.Invoice)
                     .Where(o => o.Status == "ReadyDelivery" || (o.Invoice != null && o.Status == "Reviewed"));
 
                 if (!string.IsNullOrWhiteSpace(keyword))
                 {
-                    keyword = keyword.ToLower();
+                    keyword = keyword.Trim().ToLower();
                     query = query.Where(o =>
                         o.OrderId.ToString().Contains(keyword) ||
                         (o.Customer != null && o.Customer.FullName.ToLower().Contains(keyword)) ||
@@ -33,7 +33,7 @@ namespace DoAn1.Services
             }
         }
 
-        // 2. BẮT ĐẦU GIAO HÀNG (Nút "Giao hàng" ở Tab 1)
+        // 2. BẮT ĐẦU GIAO HÀNG
         public bool StartDelivery(int orderId, int employeeId)
         {
             using (var db = new AppDbContext())
@@ -45,10 +45,8 @@ namespace DoAn1.Services
                         var order = db.Orders.FirstOrDefault(o => o.OrderId == orderId);
                         if (order == null) return false;
 
-                        // Cập nhật trạng thái đơn hàng sang Delivering
                         order.Status = "Delivering";
 
-                        // Tạo bản ghi vận chuyển trong bảng Delivery
                         var delivery = new Delivery
                         {
                             OrderId = orderId,
@@ -70,12 +68,12 @@ namespace DoAn1.Services
             }
         }
 
-        // 3. LẤY DANH SÁCH ĐƠN ĐANG GIAO CỦA NHÂN VIÊN (Có hỗ trợ tìm kiếm)
+        // 3. LẤY DANH SÁCH ĐƠN ĐANG GIAO CỦA NHÂN VIÊN
         public List<Delivery> GetDeliveringOrders(int employeeId, string keyword = "")
         {
             using (var db = new AppDbContext())
             {
-                var query = db.Deliveries
+                var query = db.Deliveries.AsNoTracking()
                     .Include(d => d.Order)
                         .ThenInclude(o => o.Customer)
                     .Include(d => d.Order)
@@ -84,7 +82,7 @@ namespace DoAn1.Services
 
                 if (!string.IsNullOrWhiteSpace(keyword))
                 {
-                    keyword = keyword.ToLower();
+                    keyword = keyword.Trim().ToLower();
                     query = query.Where(d =>
                         d.OrderId.ToString().Contains(keyword) ||
                         (d.Order.Customer != null && d.Order.Customer.FullName.ToLower().Contains(keyword)) ||
@@ -95,7 +93,7 @@ namespace DoAn1.Services
             }
         }
 
-        // 4. XÁC NHẬN GIAO HÀNG THÀNH CÔNG (Nút ở Tab 2)
+        // 4. XÁC NHẬN GIAO HÀNG THÀNH CÔNG
         public bool ConfirmDeliverySuccess(int orderId)
         {
             using (var db = new AppDbContext())
@@ -104,15 +102,11 @@ namespace DoAn1.Services
                 {
                     try
                     {
-                        var order = db.Orders
-                            .Include(o => o.Invoice)
-                            .FirstOrDefault(o => o.OrderId == orderId);
-
+                        var order = db.Orders.FirstOrDefault(o => o.OrderId == orderId);
                         var delivery = db.Deliveries.FirstOrDefault(d => d.OrderId == orderId && d.DeliveredDate == null);
 
                         if (order == null || delivery == null) return false;
 
-                        // Cập nhật trạng thái Đơn hàng & Delivery
                         order.Status = "Completed";
                         delivery.DeliveredDate = DateTime.Now;
 
@@ -129,7 +123,7 @@ namespace DoAn1.Services
             }
         }
 
-        // 5. XÁC NHẬN TRẢ HÀNG (Nút ở Tab 2)
+        // 5. XÁC NHẬN YÊU CẦU TRẢ HÀNG
         public bool ConfirmDeliveryReturn(int orderId, string returnReason)
         {
             using (var db = new AppDbContext())
@@ -138,32 +132,16 @@ namespace DoAn1.Services
                 {
                     try
                     {
-                        // Thêm Include(o => o.OrderDetails) để lấy thông tin các sản phẩm trong đơn
-                        var order = db.Orders
-                            .Include(o => o.OrderDetails)
-                            .FirstOrDefault(o => o.OrderId == orderId);
-
+                        var order = db.Orders.FirstOrDefault(o => o.OrderId == orderId);
                         var delivery = db.Deliveries.FirstOrDefault(d => d.OrderId == orderId && d.ReturnDate == null);
 
                         if (order == null || delivery == null) return false;
 
-                        // Cập nhật trạng thái đơn hàng bị trả
-                        order.Status = "Returned";
+                        order.Status = "Returning";
                         order.CancelReason = returnReason;
 
-                        // Cập nhật thông tin trả hàng trong Delivery
                         delivery.ReturnDate = DateTime.Now;
                         delivery.ReturnReason = returnReason;
-
-                        // HOÀN SỐ LƯỢNG HÀNG VÀO KHO (TĂNG OPENINGQUANTITY)
-                        foreach (var detail in order.OrderDetails)
-                        {
-                            var product = db.Products.FirstOrDefault(p => p.ProductId == detail.ProductId);
-                            if (product != null)
-                            {
-                                product.OpeningQuantity += detail.Quantity;
-                            }
-                        }
 
                         db.SaveChanges();
                         transaction.Commit();
@@ -178,37 +156,39 @@ namespace DoAn1.Services
             }
         }
 
-        // 6. LẤY LỊCH SỬ GIAO HÀNG CỦA NHÂN VIÊN (Có hỗ trợ tìm kiếm)
-        public List<dynamic> GetDeliveryHistory(int employeeId, string keyword = "")
+        // 6. LẤY LỊCH SỬ GIAO HÀNG (Sử dụng DTO & Helper)
+        // 6. LẤY LỊCH SỬ GIAO HÀNG (Đã sửa lỗi thiếu Invoice)
+        public List<DeliveryHistoryDTO> GetDeliveryHistory(int employeeId, string keyword = "")
         {
             using (var db = new AppDbContext())
             {
-                var query = db.Deliveries
+                var query = db.Deliveries.AsNoTracking()
                     .Include(d => d.Order)
                         .ThenInclude(o => o.Customer)
                     .Include(d => d.Order)
-                        .ThenInclude(o => o.Invoice)
-                    .Where(d => d.EmployeeId == employeeId && (d.DeliveredDate != null || d.ReturnDate != null));
+                        .ThenInclude(o => o.Invoice) // 🟢 BỔ SUNG: Include Invoice để lấy dữ liệu hóa đơn
+                    .Where(d => (employeeId <= 0 || d.EmployeeId == employeeId) && (d.DeliveredDate != null || d.ReturnDate != null));
 
                 if (!string.IsNullOrWhiteSpace(keyword))
                 {
-                    keyword = keyword.ToLower();
+                    keyword = keyword.Trim().ToLower();
                     query = query.Where(d =>
                         d.OrderId.ToString().Contains(keyword) ||
                         (d.Order.Customer != null && d.Order.Customer.FullName.ToLower().Contains(keyword)));
                 }
 
-                return query.Select(d => new
+                var rawList = query.OrderByDescending(d => d.DeliveredDate ?? d.ReturnDate).ToList();
+
+                // Map sang DTO an toàn
+                return rawList.Select(d => new DeliveryHistoryDTO
                 {
-                    Mã_Đơn = d.OrderId,
-                    Khách_Hàng = d.Order.Customer != null ? d.Order.Customer.FullName : "Khách lẻ",
-                    Trạng_Thái = d.DeliveredDate != null ? "Giao thành công" : "Trả hàng",
-                    Ngày_Giao = d.DeliveredDate ?? d.ReturnDate,
-                    Lý_Do_Trả = d.ReturnReason ?? "",
-                    OrderObj = d.Order // Lưu đối tượng Order để đổ data lên panel
-                })
-                .OrderByDescending(d => d.Ngày_Giao)
-                .ToList<dynamic>();
+                    OrderId = d.OrderId,
+                    CustomerName = d.Order.Customer?.FullName ?? "Khách lẻ",
+                    StatusText = OrderStatusHelper.GetText(d.Order.Status),
+                    DeliveryDate = d.DeliveredDate ?? d.ReturnDate,
+                    ReturnReason = d.ReturnReason ?? "",
+                    OrderObj = d.Order
+                }).ToList();
             }
         }
     }
