@@ -1,6 +1,6 @@
-## 📋 Mục lục
+# 📋 Mục lục
 
-1. [Bật TCP/IP cho SQL Server Express](#1.Hướng Dẫn Cấu Hình SQL Server Express Cho Phép Kết Nối Qua Mạng)
+1. [Hướng Dẫn Cấu Hình SQL Server Express Cho Phép Kết Nối Qua Mạng](#1-hướng-dẫn-cấu-hình-sql-server-express-cho-phép-kết-nối-qua-mạng)
 
 ## 1.Hướng Dẫn Cấu Hình SQL Server Express Cho Phép Kết Nối Qua Mạng
 
@@ -8,7 +8,7 @@
 
 ---
 
-# 1. Bật TCP/IP cho SQL Server Express
+### 1.1. Bật TCP/IP cho SQL Server Express
 
 Mặc định SQL Server Express tắt tính năng kết nối qua mạng. Bạn cần bật giao thức TCP/IP và cố định cổng 1433.
 
@@ -25,9 +25,9 @@ Mặc định SQL Server Express tắt tính năng kết nối qua mạng. Bạn
 
 ---
 
-# 2. Thiết lập Tài khoản Đăng nhập & Phân quyền
+### 1.2. Thiết lập Tài khoản Đăng nhập & Phân quyền
 
-### Bước 1: Mở khóa & Cập nhật mật khẩu chuẩn cho tài khoản `thailo`
+#### Bước 1: Mở khóa & Cập nhật mật khẩu chuẩn cho tài khoản `thailo`
 
 Chạy đoạn SQL này trên Query Window để đặt lại mật khẩu thành `123456`, bỏ qua quy tắc mật khẩu phức tạp của Windows và unlock tài khoản:
 
@@ -44,7 +44,7 @@ ALTER LOGIN [thailo] ENABLE;
 GO
 ```
 
-### Bước 2: Bật chế độ Mixed Mode (SQL Server and Windows Authentication)
+#### Bước 2: Bật chế độ Mixed Mode (SQL Server and Windows Authentication)
 
 Chạy lệnh can thiệp Registry sau để ép SQL Server bật chế độ đăng nhập bằng tài khoản SQL (User/Password):
 
@@ -58,7 +58,7 @@ EXEC xp_instance_regwrite
 GO
 ```
 
-### Bước 3: Cấp quyền Full (db_owner) cho `thailo` vào `lavitadb`
+#### Bước 3: Cấp quyền Full (db_owner) cho `thailo` vào `lavitadb`
 
 Đảm bảo user này được ánh xạ và có quyền Admin trên database `lavitadb`:
 
@@ -79,7 +79,7 @@ GO
 
 ---
 
-# 3. Mở Cổng 1433 trên Tường lửa (Windows Firewall)
+### 1.3. Mở Cổng 1433 trên Tường lửa (Windows Firewall)
 
 Nếu không mở cổng 1433, Windows Defender Firewall sẽ chặn các máy tính khác kết nối vào SQL Server.
 
@@ -93,13 +93,13 @@ Nếu không mở cổng 1433, Windows Defender Firewall sẽ chặn các máy t
 
 ---
 
-# 4. Sửa lại chuỗi kết nối
+### 1.4. Sửa lại chuỗi kết nối
 
 ```C#
     string connectionString = @"Server=172.31.143.125;Database=lavitadb;User Id=thailo;Password=123456;TrustServerCertificate=True;Pooling=False;";
 ```
 
-# 5. Khởi động lại SQL Server Service
+### 1.5. Khởi động lại SQL Server Service
 
 ⚠️ **CỰC KỲ QUAN TRỌNG:** Sau khi hoàn thành các bước trên, bạn **bắt buộc phải Restart dịch vụ SQL Server** để toàn bộ cấu hình mới có hiệu lực.
 
