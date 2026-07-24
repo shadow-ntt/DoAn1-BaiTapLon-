@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DoAn1.Models.Tables;
+using DoAn1.Models.Helpers;
 using DoAn1.Services;
 
 namespace DoAn1.Forms
@@ -67,8 +68,17 @@ namespace DoAn1.Forms
         {
             lstOrders.Items.Clear();
 
-            // Gọi Service lấy danh sách đơn chờ duyệt từ DB
-            List<Order> pendingOrders = _supervisorService.GetPendingOrders(_currentEmployeeId);
+            // Gọi Service lấy ProcessResult chứa danh sách đơn chờ duyệt từ DB
+            var result = _supervisorService.GetPendingOrders(_currentEmployeeId);
+
+            if (!result.IsSuccess)
+            {
+                MessageBox.Show(result.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ClearPendingDetails();
+                return;
+            }
+
+            List<Order> pendingOrders = result.Data ?? new List<Order>();
 
             foreach (var order in pendingOrders)
             {
@@ -107,37 +117,30 @@ namespace DoAn1.Forms
             lblOrderTitle.Text = $"Chi tiết đơn hàng: #{order.OrderId}";
             lblCustomerInfo.Text = $"Khách hàng: {custName} | Ngày đặt: {order.OrderDate:dd/MM/yyyy HH:mm}";
 
-            // =========================================================================
             // 1. XỬ LÝ CẢNH BÁO VƯỢT TÍN DỤNG (MÀU ĐỎ)
-            // =========================================================================
-            // Tính tổng tiền đơn hàng hiện tại
             decimal totalAmount = order.OrderDetails?.Sum(d => d.Quantity * (d.UnitPrice > 0 ? d.UnitPrice : (d.Product?.UnitPrice ?? 0))) ?? 0;
-
-            // Lấy thông tin hạn mức & nợ hiện tại từ Customer (Đổi tên thuộc tính nếu Model của bạn khác tên)
             decimal creditLimit = order.Customer?.CreditLimit ?? 0;
 
-            // Điều kiện vượt tín dụng: Nợ cũ + Đơn mới > Hạn mức (hoặc tùy logic cờ Check của bạn)
-            bool isCreditExceeded = ( totalAmount) > creditLimit && creditLimit > 0;
+            bool isCreditExceeded = totalAmount > creditLimit && creditLimit > 0;
 
             if (isCreditExceeded)
             {
-                // Chuyển màu chữ Label sang ĐỎ IN ĐẬM
                 lblCreditPlaceholder.ForeColor = Color.Red;
                 lblCreditPlaceholder.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
                 lblCreditPlaceholder.Text = $"• Khách hàng: {custName}\n\n" +
                                             $"• CẢNH BÁO: VƯỢT HẠN MỨC TÍN DỤNG!\n" +
-                                            $"• Hạn mức: {creditLimit:N0} đ | Đơn: {( totalAmount):N0} đ\n\n" +
-                                            $"• Trạng thái đơn: {order.Status}";
+                                            $"• Hạn mức: {creditLimit:N0} đ | Đơn: {totalAmount:N0} đ\n\n" +
+                                            $"• Trạng thái đơn:  {OrderStatusHelper.GetText(order.Status)}";
             }
             else
             {
-                // Trở về màu chữ bình thường
                 lblCreditPlaceholder.ForeColor = Color.FromArgb(30, 41, 59);
                 lblCreditPlaceholder.Font = new Font("Segoe UI", 10F, FontStyle.Regular);
                 lblCreditPlaceholder.Text = $"• Khách hàng: {custName}\n\n" +
                                             $"• Hạn mức tín dụng: An toàn ({creditLimit:N0} đ)\n\n" +
-                                            $"• Trạng thái đơn: {order.Status}";
+                                            $"• Trạng thái đơn: {OrderStatusHelper.GetText(order.Status)}";
             }
+
             // 2. XỬ LÝ CẢNH BÁO THIẾU HÀNG TỒN KHO (MÀU ĐỎ)
             dgvInventory.Rows.Clear();
             if (order.OrderDetails != null)
@@ -155,7 +158,6 @@ namespace DoAn1.Forms
 
                     int rowIndex = dgvInventory.Rows.Add(prodName, orderQty, stockQty, stockStatus);
 
-                    // Nếu thiếu hàng -> Đổi màu chữ ô Trạng thái thành MÀU ĐỎ IN ĐẬM
                     if (isShortage)
                     {
                         dgvInventory.Rows[rowIndex].Cells[3].Style.ForeColor = Color.Red;
@@ -183,7 +185,6 @@ namespace DoAn1.Forms
 
                 if (confirm == DialogResult.Yes)
                 {
-                    // Gọi Service phê duyệt đơn hàng
                     var result = _supervisorService.ApproveOrder(selectedOrder.OrderId);
 
                     if (result.IsSuccess)
@@ -216,7 +217,6 @@ namespace DoAn1.Forms
 
                 if (confirm == DialogResult.Yes)
                 {
-                    // Gọi Service từ chối đơn hàng với lý do
                     var result = _supervisorService.RejectOrder(selectedOrder.OrderId, reason);
 
                     if (result.IsSuccess)
@@ -233,7 +233,6 @@ namespace DoAn1.Forms
             }
         }
 
-        // Tùy chỉnh vẽ giao diện cho ListBox danh sách đơn hàng (ĐÃ TỐI ƯU FONT & MÀU SẮC RÕ NÉT)
         private void LstOrders_DrawItem(object sender, DrawItemEventArgs e)
         {
             if (e.Index < 0 || e.Index >= lstOrders.Items.Count) return;
@@ -243,25 +242,21 @@ namespace DoAn1.Forms
             bool isSelected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
             if (lstOrders.Items[e.Index] is Order order)
             {
-                // Màu nền khi chọn và khi bình thường
                 Color backColor = isSelected ? Color.FromArgb(238, 242, 255) : Color.White;
                 using (Brush b = new SolidBrush(backColor))
                 {
                     e.Graphics.FillRectangle(b, e.Bounds);
                 }
 
-                // Đường kẻ phân cách hàng
                 using (Pen p = new Pen(Color.FromArgb(226, 232, 240)))
                 {
                     e.Graphics.DrawLine(p, e.Bounds.Left, e.Bounds.Bottom - 1, e.Bounds.Right, e.Bounds.Bottom - 1);
                 }
 
-                // Nâng Size Font chữ rõ nét
                 using (Font fontTitle = new Font("Segoe UI", 10.5F, FontStyle.Bold))
                 using (Font fontSub = new Font("Segoe UI", 9.5F, FontStyle.Regular))
                 using (Font fontDate = new Font("Segoe UI", 9.0F, FontStyle.Regular))
                 {
-                    // Màu chữ rõ, tương phản cao (không dùng LightGray mờ)
                     using (Brush titleBrush = isSelected ? new SolidBrush(Color.FromArgb(79, 70, 229)) : new SolidBrush(Color.FromArgb(15, 23, 42)))
                     using (Brush subTextBrush = new SolidBrush(Color.FromArgb(51, 65, 85)))
                     using (Brush dateBrush = new SolidBrush(Color.FromArgb(100, 116, 139)))
@@ -309,16 +304,24 @@ namespace DoAn1.Forms
 
             string keyword = txtSearch.Text.Trim();
 
-            // Gọi Service truy vấn Lịch sử đơn hàng kèm từ khóa tìm kiếm
-            _currentHistoryList = _supervisorService.GetReviewedHistoryOrders(_currentEmployeeId, keyword);
+            // Gọi Service lấy ProcessResult chứa Lịch sử đơn hàng
+            var result = _supervisorService.GetReviewedHistoryOrders(_currentEmployeeId, keyword);
+
+            if (!result.IsSuccess)
+            {
+                MessageBox.Show(result.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _currentHistoryList = new List<Order>();
+                return;
+            }
+
+            _currentHistoryList = result.Data ?? new List<Order>();
 
             foreach (var order in _currentHistoryList)
             {
                 string custName = order.Customer?.FullName ?? "N/A";
                 string reviewDate = order.ReviewedDate?.ToString("dd/MM/yyyy HH:mm") ?? order.OrderDate.ToString("dd/MM/yyyy HH:mm");
 
-                string statusText = order.Status == "Reviewed" ? "Đã duyệt" :
-                                   (order.Status == "Rejected" ? "Từ chối" : order.Status);
+                string statusText = OrderStatusHelper.GetText(order.Status);
 
                 dgvHistoryList.Rows.Add(order.OrderId, custName, reviewDate, statusText);
             }
@@ -332,7 +335,6 @@ namespace DoAn1.Forms
 
         private void TxtSearch_TextChanged(object sender, EventArgs e)
         {
-            // Tìm kiếm trực tiếp qua Service khi gõ từ khóa
             LoadHistoryList(showNotification: false);
         }
 
@@ -346,8 +348,7 @@ namespace DoAn1.Forms
                     var order = _currentHistoryList[selectedIndex];
 
                     string custName = order.Customer?.FullName ?? "N/A";
-                    string statusText = order.Status == "Reviewed" ? "Đã duyệt" :
-                                       (order.Status == "Rejected" ? "Từ chối" : order.Status);
+                    string statusText = OrderStatusHelper.GetText(order.Status);
 
                     lblHistoryCustomerDetails.Text = $"• Mã đơn hàng: #{order.OrderId}\n\n" +
                                                      $"• Khách hàng: {custName}\n\n" +
@@ -358,7 +359,6 @@ namespace DoAn1.Forms
                         ? "Đã phê duyệt (không có ghi chú lý do từ chối)."
                         : order.CancelReason;
 
-                    // Hiển thị danh sách sản phẩm của đơn lịch sử
                     dgvHistoryProducts.Rows.Clear();
                     if (order.OrderDetails != null)
                     {
@@ -367,11 +367,9 @@ namespace DoAn1.Forms
                             string prodName = detail.Product?.ProductName ?? "Sản phẩm không xác định";
                             int qty = detail.Quantity;
 
-                            // Lấy đơn giá và tính thành tiền
                             decimal price = detail.UnitPrice > 0 ? detail.UnitPrice : (detail.Product?.UnitPrice ?? 0);
                             decimal total = price * qty;
 
-                            // Nạp ĐỦ 4 CỘT theo đúng thiết kế
                             dgvHistoryProducts.Rows.Add(
                                 prodName,
                                 qty,

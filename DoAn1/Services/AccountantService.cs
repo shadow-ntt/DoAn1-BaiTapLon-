@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using DoAn1.Models.Tables;
-using DoAn1.Models.Views;
+using DoAn1.Models.Helpers;
 using DoAn1.Data;
 namespace DoAn1.Services
 {

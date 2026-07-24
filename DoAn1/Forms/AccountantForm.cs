@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using ClosedXML.Excel;
 using DoAn1.Models.Tables;
-using DoAn1.Models.Views;
+using DoAn1.Models.Helpers;
 using DoAn1.Services;
 using Xceed.Words.NET;
 
@@ -158,6 +158,7 @@ namespace DoAn1.Forms
             invSb.AppendLine($"Khách hàng : {custName}");
             invSb.AppendLine($"Mã số thuế : {taxCode}");
             invSb.AppendLine($"Ngày đặt   : {order.OrderDate:dd/MM/yyyy HH:mm}");
+            invSb.AppendLine($"Ngày lập hóa đơn: {DateTime.Now:dd/MM/yyyy}");
             invSb.AppendLine("-------------------------------------------");
             invSb.AppendLine(string.Format("{0,-20} {1,5} {2,15}", "Sản phẩm", "SL", "Thành tiền"));
 

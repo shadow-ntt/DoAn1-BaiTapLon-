@@ -9,7 +9,19 @@ namespace DoAn1
     {
         public MainForm()
         {
-            InitializeComponent();
+            try
+            {
+                InitializeComponent();
+            }
+            catch (Exception ex)
+            {
+                // Log initialization exception to help find origin during debug
+                System.IO.File.WriteAllText("init-exception.txt", ex.ToString());
+                throw;
+            }
+
+            //init event
+            this.textBoxPass.KeyDown += textBoxPass_KeyDown;
         }
 
         // Sự kiện khi tích chọn hoặc bỏ tích CheckBox
@@ -56,6 +68,18 @@ namespace DoAn1
             }
 
             MessageBox.Show(processResult.Message);
+        }
+        private void textBoxPass_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Kiểm tra nếu phím được nhấn là Enter
+            if (e.KeyCode == Keys.Enter)
+            {
+                // Chặn tiếng "beep" mặc định của Windows khi nhấn Enter trong TextBox
+                e.SuppressKeyPress = true;
+
+                // Gọi trực tiếp sự kiện click của nút đăng nhập
+                buttonLogin_Click(sender, e);
+            }
         }
     }
 }

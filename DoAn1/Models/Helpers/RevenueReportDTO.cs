@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DoAn1.Models.Views
+namespace DoAn1.Models.Helpers
 {
     public class RevenueReportDTO
     {

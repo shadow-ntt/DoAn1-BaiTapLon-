@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using DoAn1.Models.Results;
@@ -18,93 +17,169 @@ namespace DoAn1.Services
             db = new AppDbContext();
         }
 
-        // 1. Lấy danh sách đơn hàng chờ duyệt (Status = "Created")
-        public List<Order> GetPendingOrders(int currentEmployeeId)
+        // 1. LẤY DANH SÁCH ĐƠN HÀNG CHỜ DUYỆT (Status = "Created")
+        public ProcessResult<List<Order>> GetPendingOrders(int currentEmployeeId)
         {
-            return db.Orders
-                .Include(o => o.Customer)
-                    .ThenInclude(c => c.Employee)
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product)
-                .Where(o => o.Status == "Created" && o.Customer.Employee.EmployeeId == currentEmployeeId)
-                .OrderByDescending(o => o.OrderDate)
-                .ToList();
+            try
+            {
+                var list = db.Orders
+                    .Include(o => o.Customer)
+                        .ThenInclude(c => c.Employee)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
+                    .Where(o => o.Status == "Created" && o.Customer.Employee.EmployeeId == currentEmployeeId)
+                    .OrderByDescending(o => o.OrderDate)
+                    .ToList();
+
+                return new ProcessResult<List<Order>>
+                {
+                    IsSuccess = true,
+                    Message = "Lấy danh sách đơn hàng chờ duyệt thành công.",
+                    Data = list
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ProcessResult<List<Order>>
+                {
+                    IsSuccess = false,
+                    Message = "Lỗi hệ thống."
+                };
+            }
         }
 
         // 2. LẤY LỊCH SỬ ĐƠN HÀNG ĐÃ KIỂM DUYỆT (Reviewed hoặc Rejected / Cancelled)
-        public List<Order> GetReviewedHistoryOrders(int currentEmployeeId, string keyword = "")
+        public ProcessResult<List<Order>> GetReviewedHistoryOrders(int currentEmployeeId, string keyword = "")
         {
-            var query = db.Orders
-                .Include(o => o.Customer)
-                    .ThenInclude(c => c.Employee)
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product)
-                .Where(o => o.Status != "Created" && o.Customer.Employee.EmployeeId == currentEmployeeId);
-
-            if (!string.IsNullOrWhiteSpace(keyword))
+            try
             {
-                keyword = keyword.Trim().ToLower();
-                query = query.Where(o => o.OrderId.ToString().Contains(keyword) ||
-                                         o.Customer.FullName.ToLower().Contains(keyword));
-            }
+                var query = db.Orders
+                    .Include(o => o.Customer)
+                        .ThenInclude(c => c.Employee)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
+                    .Where(o => o.Status != "Created" && o.Customer.Employee.EmployeeId == currentEmployeeId);
 
-            return query.OrderByDescending(o => o.ReviewedDate ?? o.OrderDate).ToList();
+                if (!string.IsNullOrWhiteSpace(keyword))
+                {
+                    keyword = keyword.Trim().ToLower();
+                    query = query.Where(o => o.OrderId.ToString().Contains(keyword) ||
+                                             o.Customer.FullName.ToLower().Contains(keyword));
+                }
+
+                var list = query.OrderByDescending(o => o.ReviewedDate ?? o.OrderDate).ToList();
+
+                return new ProcessResult<List<Order>>
+                {
+                    IsSuccess = true,
+                    Message = "Lấy lịch sử đơn hàng đã kiểm duyệt thành công.",
+                    Data = list
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ProcessResult<List<Order>>
+                {
+                    IsSuccess = false,
+                    Message = "Lỗi hệ thống."
+                };
+            }
         }
 
-        // 3. Phê duyệt đơn hàng
+        // 3. PHÊ DUYỆT ĐƠN HÀNG
         public ProcessResult<Order> ApproveOrder(int orderId)
         {
-            var order = db.Orders
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product)
-                .FirstOrDefault(o => o.OrderId == orderId);
-
-            if (order == null)
-                return new ProcessResult<Order> { IsSuccess = false, Message = "Không tìm thấy đơn hàng." };
-
-            foreach (var detail in order.OrderDetails)
+            try
             {
-                if (detail.Product.OpeningQuantity < detail.Quantity)
+                var order = db.Orders
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
+                    .FirstOrDefault(o => o.OrderId == orderId);
+
+                if (order == null)
                 {
                     return new ProcessResult<Order>
                     {
                         IsSuccess = false,
-                        Message = $"Đơn hàng không khả thi! Sản phẩm [{detail.Product.ProductName}] thiếu {detail.Quantity - detail.Product.OpeningQuantity} món."
+                        Message = "Không tìm thấy đơn hàng."
                     };
                 }
+
+                foreach (var detail in order.OrderDetails)
+                {
+                    if (detail.Product.OpeningQuantity < detail.Quantity)
+                    {
+                        return new ProcessResult<Order>
+                        {
+                            IsSuccess = false,
+                            Message = $"Đơn hàng không khả thi! Sản phẩm [{detail.Product.ProductName}] thiếu {detail.Quantity - detail.Product.OpeningQuantity} món."
+                        };
+                    }
+                }
+
+                foreach (var detail in order.OrderDetails)
+                {
+                    detail.Product.OpeningQuantity -= detail.Quantity;
+                }
+
+                order.Status = "Reviewed";
+                order.ReviewedDate = DateTime.Now;
+
+                db.SaveChanges();
+
+                return new ProcessResult<Order>
+                {
+                    IsSuccess = true,
+                    Message = "Xác nhận đơn hàng HỢP LỆ và KHẢ THI! Đã chuyển vào hồ sơ chờ lập hóa đơn.",
+                    Data = order
+                };
             }
-
-            foreach (var detail in order.OrderDetails)
+            catch (Exception ex)
             {
-                detail.Product.OpeningQuantity -= detail.Quantity;
+                return new ProcessResult<Order>
+                {
+                    IsSuccess = false,
+                    Message = "Lỗi hệ thống."
+                };
             }
-
-            order.Status = "Reviewed";
-            order.ReviewedDate = DateTime.Now;
-
-            db.SaveChanges();
-
-            return new ProcessResult<Order>
-            {
-                IsSuccess = true,
-                Message = "Xác nhận đơn hàng HỢP LỆ và KHẢ THI! Đã chuyển vào hồ sơ chờ lập hóa đơn.",
-                Data = order
-            };
         }
 
-        // 4. Từ chối đơn hàng
+        // 4. TỪ CHỐI ĐƠN HÀNG
         public ProcessResult<Order> RejectOrder(int orderId, string reason)
         {
-            var order = db.Orders.FirstOrDefault(o => o.OrderId == orderId);
-            if (order == null)
-                return new ProcessResult<Order> { IsSuccess = false, Message = "Không tìm thấy đơn hàng." };
+            try
+            {
+                var order = db.Orders.FirstOrDefault(o => o.OrderId == orderId);
+                if (order == null)
+                {
+                    return new ProcessResult<Order>
+                    {
+                        IsSuccess = false,
+                        Message = "Không tìm thấy đơn hàng."
+                    };
+                }
 
-            order.Status = "Rejected";
-            order.CancelReason = reason;
-            order.ReviewedDate = DateTime.Now;
+                order.Status = "Rejected";
+                order.CancelReason = reason;
+                order.ReviewedDate = DateTime.Now;
 
-            db.SaveChanges();
-            return new ProcessResult<Order> { IsSuccess = true, Message = "Đã gửi trả đơn hàng không hợp lệ về cho khách hàng.", Data = order };
+                db.SaveChanges();
+
+                return new ProcessResult<Order>
+                {
+                    IsSuccess = true,
+                    Message = "Đã gửi trả đơn hàng không hợp lệ về cho khách hàng.",
+                    Data = order
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ProcessResult<Order>
+                {
+                    IsSuccess = false,
+                    Message = "Lỗi hệ thống."
+                };
+            }
         }
     }
 }

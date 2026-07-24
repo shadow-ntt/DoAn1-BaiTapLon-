@@ -4,12 +4,11 @@ using System.Linq;
 using DoAn1.Data;
 using DoAn1.Models.Results;
 using DoAn1.Models.Tables;
-using DoAn1.Models.Views;
+using DoAn1.Models.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace DoAn1.Services
 {
-
     public class ProductService
     {
         #region TAB 1: Inventory Management (Quản lý tồn kho)
@@ -31,12 +30,21 @@ namespace DoAn1.Services
                                               || p.Type.Contains(keyword)
                                               || p.ProductId.ToString().Equals(keyword));
                     }
-                    return new ProcessResult<List<Product>> { IsSuccess = true, Data = query.ToList() };
+
+                    return new ProcessResult<List<Product>>
+                    {
+                        IsSuccess = true,
+                        Data = query.ToList()
+                    };
                 }
             }
             catch (Exception ex)
             {
-                return new ProcessResult<List<Product>> { IsSuccess = false, Message = "Lỗi hệ thống: " + ex.Message };
+                return new ProcessResult<List<Product>>
+                {
+                    IsSuccess = false,
+                    Message = "Lỗi hệ thống."
+                };
             }
         }
 
@@ -52,12 +60,22 @@ namespace DoAn1.Services
                 {
                     db.Products.Add(newProduct);
                     db.SaveChanges();
-                    return new ProcessResult<Product> { IsSuccess = true, Message = "Nhập sản phẩm mới thành công!", Data = newProduct };
+
+                    return new ProcessResult<Product>
+                    {
+                        IsSuccess = true,
+                        Message = "Nhập sản phẩm mới thành công!",
+                        Data = newProduct
+                    };
                 }
             }
             catch (Exception ex)
             {
-                return new ProcessResult<Product> { IsSuccess = false, Message = "Lỗi nhập hàng: " + ex.Message };
+                return new ProcessResult<Product>
+                {
+                    IsSuccess = false,
+                    Message = "Lỗi hệ thống"
+                };
             }
         }
 
@@ -69,7 +87,13 @@ namespace DoAn1.Services
                 {
                     var product = db.Products.FirstOrDefault(p => p.ProductId == id);
                     if (product == null)
-                        return new ProcessResult<Product> { IsSuccess = false, Message = "Không tìm thấy sản phẩm cần sửa." };
+                    {
+                        return new ProcessResult<Product>
+                        {
+                            IsSuccess = false,
+                            Message = "Không tìm thấy sản phẩm cần sửa."
+                        };
+                    }
 
                     product.ProductName = updatedData.ProductName;
                     product.Description = updatedData.Description;
@@ -78,12 +102,22 @@ namespace DoAn1.Services
                     product.OpeningQuantity = updatedData.OpeningQuantity;
 
                     db.SaveChanges();
-                    return new ProcessResult<Product> { IsSuccess = true, Message = "Cập nhật thông tin sản phẩm thành công!", Data = product };
+
+                    return new ProcessResult<Product>
+                    {
+                        IsSuccess = true,
+                        Message = "Cập nhật thông tin sản phẩm thành công!",
+                        Data = product
+                    };
                 }
             }
             catch (Exception ex)
             {
-                return new ProcessResult<Product> { IsSuccess = false, Message = "Lỗi cập nhật: " + ex.Message };
+                return new ProcessResult<Product>
+                {
+                    IsSuccess = false,
+                    Message = "Lỗi hệ thống."
+                };
             }
         }
 
@@ -106,16 +140,32 @@ namespace DoAn1.Services
 
                     var product = db.Products.FirstOrDefault(p => p.ProductId == id);
                     if (product == null)
-                        return new ProcessResult<bool> { IsSuccess = false, Message = "Sản phẩm không tồn tại hoặc đã bị xóa trước đó." };
+                    {
+                        return new ProcessResult<bool>
+                        {
+                            IsSuccess = false,
+                            Message = "Sản phẩm không tồn tại hoặc đã bị xóa trước đó."
+                        };
+                    }
 
                     db.Products.Remove(product);
                     db.SaveChanges();
-                    return new ProcessResult<bool> { IsSuccess = true, Message = "Đã xóa sản phẩm khỏi kho thành công!", Data = true };
+
+                    return new ProcessResult<bool>
+                    {
+                        IsSuccess = true,
+                        Message = "Đã xóa sản phẩm khỏi kho thành công!",
+                        Data = true
+                    };
                 }
             }
             catch (Exception ex)
             {
-                return new ProcessResult<bool> { IsSuccess = false, Message = "Lỗi khi xóa: " + ex.Message };
+                return new ProcessResult<bool>
+                {
+                    IsSuccess = false,
+                    Message = "Lỗi hệ thống."
+                };
             }
         }
 
@@ -151,8 +201,8 @@ namespace DoAn1.Services
                         OrderId = o.OrderId,
                         CustomerName = o.Customer != null ? o.Customer.FullName : "Khách vô danh",
                         OrderDate = o.OrderDate,
-                        InvoiceDate = o.Invoice != null ? o.Invoice.InvoiceDate : (DateTime?)null, // Cập nhật lấy Ngày lập hóa đơn
-                        Status = o.Status,
+                        InvoiceDate = o.Invoice != null ? o.Invoice.InvoiceDate : (DateTime?)null, 
+                        Status = OrderStatusHelper.GetText(o.Status),
                         // EF Core tự dịch o.Delivery.ReturnReason ra LEFT JOIN SQL COALESCE
                         ReturnReason = o.Delivery.ReturnReason
                                        ?? o.CancelReason
@@ -173,7 +223,7 @@ namespace DoAn1.Services
                 return new ProcessResult<List<ReturnOrderDTO>>
                 {
                     IsSuccess = false,
-                    Message = "Lỗi tải danh sách đơn trả hàng: " + ex.Message
+                    Message = "Lỗi hệ thống."
                 };
             }
         }
@@ -207,7 +257,7 @@ namespace DoAn1.Services
                 return new ProcessResult<List<ReturnOrderDetailDTO>>
                 {
                     IsSuccess = false,
-                    Message = "Lỗi tải chi tiết đơn hàng: " + ex.Message
+                    Message = "Lỗi hệ thống."
                 };
             }
         }
@@ -231,7 +281,11 @@ namespace DoAn1.Services
 
                         if (order == null)
                         {
-                            return new ProcessResult<bool> { IsSuccess = false, Message = "Không tìm thấy đơn hàng!" };
+                            return new ProcessResult<bool>
+                            {
+                                IsSuccess = false,
+                                Message = "Không tìm thấy đơn hàng!"
+                            };
                         }
 
                         if (order.Status != "Returning")
@@ -270,7 +324,7 @@ namespace DoAn1.Services
                         return new ProcessResult<bool>
                         {
                             IsSuccess = false,
-                            Message = "Lỗi trong quá trình duyệt trả hàng: " + ex.Message
+                            Message = "Lỗi hệ thống."
                         };
                     }
                 }

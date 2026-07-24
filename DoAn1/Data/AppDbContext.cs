@@ -33,9 +33,9 @@ namespace DoAn1.Data
                 @"..\..\..\Database\lavitadb.mdf");
 
             dbPath = Path.GetFullPath(dbPath);
-           // string connectionString = @"Server=1.1.1.1;Database=lavitadb;User Id=thailo;Password=123456;TrustServerCertificate=True;";
-            string connectionString = @"Server=172.31.143.125;Database=lavitadb;User Id=thailo;Password=123456;TrustServerCertificate=True;Pooling=False;";
-            //string connectionString=$@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename={dbPath};Integrated Security=True;TrustServerCertificate=True;"
+            // string connectionString = @"Server=1.1.1.1;Database=lavitadb;User Id=thailo;Password=123456;TrustServerCertificate=True;";
+            //string connectionString = @"Server=172.31.143.125;Database=lavitadb;User Id=thailo;Password=123456;TrustServerCertificate=True;Pooling=False;";
+            string connectionString = $@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename={dbPath};Integrated Security=True;TrustServerCertificate=True;";
             optionsBuilder.UseSqlServer(connectionString);
         //    optionsBuilder.UseSqlServer(
         //        @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\lavitadb.mdf;Integrated Security=True;Connect Timeout=30;Encrypt=True");

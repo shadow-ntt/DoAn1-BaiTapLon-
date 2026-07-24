@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using DoAn1.Models.Tables;
-namespace DoAn1.Models.Views
+namespace DoAn1.Models.Helpers
 {
     public class DeliveryHistoryDTO
     {
@@ -20,9 +20,11 @@ namespace DoAn1.Models.Views
         {
             return status switch
             {
+                "Created"=>"Đã được tạo",
                 "ReadyDelivery" => "Chờ giao",
                 "Delivering" => "Đang giao",
                 "Completed" => "Giao thành công",
+                "Rejected"=>"Đã bị từ chối",
                 "Returning" => "Yêu cầu trả hàng (Chờ kho duyệt)",
                 "Returned" => "Đã nhập kho trả",
                 _ => status ?? "Chưa xác định"

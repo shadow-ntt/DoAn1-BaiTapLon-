@@ -100,7 +100,7 @@ namespace DoAn1.Clonee.Services
                 return new ProcessResult<Customer>
                 {
                     IsSuccess = false,
-                    Message = "Lỗi khi thêm khách hàng: " + ex.Message
+                    Message = "Lỗi hệ thống."
                 };
             }
         }

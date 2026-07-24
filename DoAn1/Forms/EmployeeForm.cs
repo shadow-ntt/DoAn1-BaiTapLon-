@@ -1,18 +1,9 @@
 ﻿using DoAn1.Clonee.Services;
-using DoAn1.Models;
+using DoAn1.Models.Helpers;
 using DoAn1.Models.Results;
 using DoAn1.Models.Tables;
-using DoAn1.Models.Views;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
+
 
 namespace DoAn1.Forms
 {
@@ -21,7 +12,7 @@ namespace DoAn1.Forms
         private CustomerService customerService;
         private OrderService orderService;
         private Customer currentCustomer;
-        private List<OrderGridView> orderGridView;
+        private BindingList<OrderGridView> orderGridView;
         public int OrderId;
         public int EmployeeId;
 
@@ -30,9 +21,13 @@ namespace DoAn1.Forms
             InitializeComponent();
             customerService = new CustomerService();
             orderService = new OrderService();
-            orderGridView = new List<OrderGridView>();
+            orderGridView = new BindingList<OrderGridView>();
             OrderId = -1;
             this.EmployeeId = EmployeeId;
+
+            dataGridView1.AutoGenerateColumns = false;
+            dataGridView1.DataSource = orderGridView;
+            dataGridView1.SelectionChanged += dataGridView1_SelectionChanged;
 
             // Hiển thị trạng thái giỏ hàng & tổng tiền ban đầu (0 VNĐ)
             resetGridView();
@@ -204,8 +199,7 @@ namespace DoAn1.Forms
         /// </summary>
         public void resetGridView()
         {
-            dataGridView1.DataSource = null;
-            dataGridView1.DataSource = orderGridView;
+            orderGridView.ResetBindings();
 
             // 1. Tự động tính tổng tiền từ tất cả sản phẩm có trong giỏ hàng
             decimal totalMoney = orderGridView != null ? orderGridView.Sum(x => x.Quantity * x.UnitPrice) : 0;
@@ -366,13 +360,15 @@ namespace DoAn1.Forms
 
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
         {
-            if (dataGridView1.DataSource != null && dataGridView1.CurrentRow != null)
+            if (dataGridView1.CurrentRow != null && dataGridView1.CurrentRow.Index >= 0 && dataGridView1.CurrentRow.Index < orderGridView.Count)
             {
-                textBProductCode.Text = dataGridView1.CurrentRow.Cells[0].Value?.ToString();
-                textBoxQuanity.Text = dataGridView1.CurrentRow.Cells[3].Value?.ToString();
+                var item = orderGridView[dataGridView1.CurrentRow.Index];
+                textBProductCode.Text = item.ProductId.ToString();
+                textBoxQuanity.Text = item.Quantity.ToString();
             }
         }
 
         #endregion
+
     }
 }

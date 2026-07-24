@@ -1,10 +1,7 @@
 ﻿using DoAn1.Models.Tables;
-using DoAn1.Models.Views;
+using DoAn1.Models.Helpers;
 using DoAn1.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
+
 
 namespace DoAn1.Forms
 {
@@ -79,14 +76,24 @@ namespace DoAn1.Forms
             try
             {
                 string keyword = txtSearchPending.Text.Trim();
-                _pendingOrders = _deliveryService.GetPendingOrders(keyword);
+                var result = _deliveryService.GetPendingOrders(keyword);
+
                 lstPendingOrders.DataSource = null;
+
+                if (!result.IsSuccess)
+                {
+                    MessageBox.Show(result.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ClearForm();
+                    return;
+                }
+
+                _pendingOrders = result.Data;
 
                 if (_pendingOrders != null && _pendingOrders.Count > 0)
                 {
                     var displayList = _pendingOrders.Select(o => new {
                         OrderData = o,
-                        DisplayText = $"[ORD-{o.OrderId}] — Khách: {o.Customer?.FullName ?? "Khách lẻ"}"
+                        DisplayText = $"#{o.OrderId} — Khách: {o.Customer?.FullName ?? "Khách lẻ"}"
                     }).ToList();
 
                     lstPendingOrders.DataSource = displayList;
@@ -126,21 +133,22 @@ namespace DoAn1.Forms
             }
 
             var confirm = MessageBox.Show(
-                $"Xác nhận nhận đơn hàng ORD-{_selectedOrder.OrderId} để bắt đầu đi giao?",
+                $"Xác nhận nhận đơn hàng #{_selectedOrder.OrderId} để bắt đầu đi giao?",
                 "Xác nhận giao hàng",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
 
             if (confirm == DialogResult.Yes)
             {
-                if (_deliveryService.StartDelivery(_selectedOrder.OrderId, _currentEmployeeId))
+                var result = _deliveryService.StartDelivery(_selectedOrder.OrderId, _currentEmployeeId);
+                if (result.IsSuccess)
                 {
-                    MessageBox.Show("Đã nhận đơn thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(result.Message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     LoadPendingOrders();
                 }
                 else
                 {
-                    MessageBox.Show("Không thể nhận đơn hàng này.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(result.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -161,14 +169,24 @@ namespace DoAn1.Forms
             try
             {
                 string keyword = txtSearchDelivering.Text.Trim();
-                _deliveringOrders = _deliveryService.GetDeliveringOrders(_currentEmployeeId, keyword);
+                var result = _deliveryService.GetDeliveringOrders(_currentEmployeeId, keyword);
+
                 lstDeliveringOrders.DataSource = null;
+
+                if (!result.IsSuccess)
+                {
+                    MessageBox.Show(result.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ClearForm();
+                    return;
+                }
+
+                _deliveringOrders = result.Data;
 
                 if (_deliveringOrders != null && _deliveringOrders.Count > 0)
                 {
                     var displayList = _deliveringOrders.Select(d => new {
                         DeliveryData = d,
-                        DisplayText = $"[ORD-{d.OrderId}] — Khách: {d.Order?.Customer?.FullName ?? "Khách lẻ"}"
+                        DisplayText = $"#{d.OrderId} — Khách: {d.Order?.Customer?.FullName ?? "Khách lẻ"}"
                     }).ToList();
 
                     lstDeliveringOrders.DataSource = displayList;
@@ -209,21 +227,22 @@ namespace DoAn1.Forms
             }
 
             var confirm = MessageBox.Show(
-                $"Xác nhận đơn hàng ORD-{_selectedOrder.OrderId} đã giao thành công & thu tiền?",
+                $"Xác nhận đơn hàng #{_selectedOrder.OrderId} đã giao thành công & thu tiền?",
                 "Xác nhận hoàn thành",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
 
             if (confirm == DialogResult.Yes)
             {
-                if (_deliveryService.ConfirmDeliverySuccess(_selectedOrder.OrderId))
+                var result = _deliveryService.ConfirmDeliverySuccess(_selectedOrder.OrderId);
+                if (result.IsSuccess)
                 {
-                    MessageBox.Show("Đã xác nhận giao hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(result.Message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     LoadDeliveringOrders();
                 }
                 else
                 {
-                    MessageBox.Show("Xảy ra lỗi khi xác nhận hoàn thành.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(result.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -244,15 +263,16 @@ namespace DoAn1.Forms
                 return;
             }
 
-            if (_deliveryService.ConfirmDeliveryReturn(_selectedOrder.OrderId, reason))
+            var result = _deliveryService.ConfirmDeliveryReturn(_selectedOrder.OrderId, reason);
+            if (result.IsSuccess)
             {
-                MessageBox.Show("Đã cập nhật trạng thái đơn hàng bị trả về hệ thống.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(result.Message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 txtReturnReason.Clear();
                 LoadDeliveringOrders();
             }
             else
             {
-                MessageBox.Show("Xảy ra lỗi khi xác nhận trả hàng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(result.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -272,8 +292,16 @@ namespace DoAn1.Forms
             try
             {
                 string keyword = txtSearchHistory.Text.Trim();
-                var historyList = _deliveryService.GetDeliveryHistory(_currentEmployeeId, keyword);
-                dgvDeliveryHistory.DataSource = historyList;
+                var result = _deliveryService.GetDeliveryHistory(_currentEmployeeId, keyword);
+
+                if (!result.IsSuccess)
+                {
+                    MessageBox.Show(result.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    dgvDeliveryHistory.DataSource = null;
+                    return;
+                }
+
+                dgvDeliveryHistory.DataSource = result.Data;
 
                 // Ẩn cột chứa đối tượng Order khỏi Grid
                 if (dgvDeliveryHistory.Columns["OrderObj"] != null)
@@ -312,18 +340,16 @@ namespace DoAn1.Forms
                 return;
             }
 
-            lblOrderTitle.Text = $"Thông tin vận chuyển đơn hàng: ORD-{order.OrderId}";
+            lblOrderTitle.Text = $"Thông tin vận chuyển đơn hàng: #{order.OrderId}";
             txtCustomerName.Text = order.Customer?.FullName ?? "Khách lẻ";
             txtPhone.Text = order.Customer?.PhoneNumber ?? "Chưa có SĐT";
             txtAddress.Text = order.Customer?.Address ?? "Chưa có địa chỉ";
             txtExpectedDate.Text = order.ExpectedDeliveryDate.ToString("dd/MM/yyyy");
 
-            // 🟢 ĐÃ CẬP NHẬT: Hiển thị Ngày lập hóa đơn
             txtInvoiceDate.Text = order.Invoice != null
                 ? order.Invoice.InvoiceDate.ToString("dd/MM/yyyy HH:mm")
                 : "Chưa lập hóa đơn";
 
-            // Gọi Helper để lấy văn bản trạng thái nếu chưa truyền vào
             txtDeliveryStatus.Text = !string.IsNullOrEmpty(statusText) ? statusText : OrderStatusHelper.GetText(order.Status);
             txtActualDeliveryDate.Text = deliveryDate.HasValue ? deliveryDate.Value.ToString("dd/MM/yyyy HH:mm") : "---";
             txtHistoryReturnReason.Text = !string.IsNullOrEmpty(returnReason) ? returnReason : (order.CancelReason ?? "Không có");
@@ -337,7 +363,7 @@ namespace DoAn1.Forms
             txtPhone.Clear();
             txtAddress.Clear();
             txtExpectedDate.Clear();
-            txtInvoiceDate.Clear(); // 🟢 ĐÃ CẬP NHẬT
+            txtInvoiceDate.Clear();
             txtDeliveryStatus.Clear();
             txtActualDeliveryDate.Clear();
             txtHistoryReturnReason.Clear();
