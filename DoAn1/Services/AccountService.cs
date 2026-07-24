@@ -37,7 +37,7 @@ namespace DoAn1.Clonee.Services
                 return new ProcessResult<Account>
                 {
                     IsSuccess = false,
-                    Message = "Lỗi hệ thống."
+                    Message = "Lỗi hệ thống. " + ex
                 };
             }
         }
