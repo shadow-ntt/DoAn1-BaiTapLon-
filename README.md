@@ -1,17 +1,14 @@
-# Hướng Dẫn Cấu Hình SQL Server Express Cho Phép Kết Nối Qua Mạng
-
----
-
 ## 📋 Mục lục
 
-1. [Bật TCP/IP cho SQL Server Express](#1-bật-tcpip-cho-sql-server-express)
-2. [Thiết lập Tài khoản Đăng nhập & Phân quyền](#2-thiết-lập-tài-khoản-đăng-nhập--phân-quyền)
-3. [Mở Cổng 1433 trên Tường lửa (Windows Firewall)](#3-mở-cổng-1433-trên-tường-lửa-windows-firewall)
-4. [Khởi động lại SQL Server Service](#4-khởi-động-lại-sql-server-service)
+1. [Bật TCP/IP cho SQL Server Express](#1.Hướng Dẫn Cấu Hình SQL Server Express Cho Phép Kết Nối Qua Mạng)
+
+## 1.Hướng Dẫn Cấu Hình SQL Server Express Cho Phép Kết Nối Qua Mạng
 
 ---
 
-## 1. Bật TCP/IP cho SQL Server Express
+---
+
+# 1. Bật TCP/IP cho SQL Server Express
 
 Mặc định SQL Server Express tắt tính năng kết nối qua mạng. Bạn cần bật giao thức TCP/IP và cố định cổng 1433.
 
@@ -28,7 +25,7 @@ Mặc định SQL Server Express tắt tính năng kết nối qua mạng. Bạn
 
 ---
 
-## 2. Thiết lập Tài khoản Đăng nhập & Phân quyền
+# 2. Thiết lập Tài khoản Đăng nhập & Phân quyền
 
 ### Bước 1: Mở khóa & Cập nhật mật khẩu chuẩn cho tài khoản `thailo`
 
@@ -82,7 +79,7 @@ GO
 
 ---
 
-## 3. Mở Cổng 1433 trên Tường lửa (Windows Firewall)
+# 3. Mở Cổng 1433 trên Tường lửa (Windows Firewall)
 
 Nếu không mở cổng 1433, Windows Defender Firewall sẽ chặn các máy tính khác kết nối vào SQL Server.
 
@@ -96,7 +93,13 @@ Nếu không mở cổng 1433, Windows Defender Firewall sẽ chặn các máy t
 
 ---
 
-## 4. Khởi động lại SQL Server Service
+# 4. Sửa lại chuỗi kết nối
+
+```C#
+    string connectionString = @"Server=172.31.143.125;Database=lavitadb;User Id=thailo;Password=123456;TrustServerCertificate=True;Pooling=False;";
+```
+
+# 5. Khởi động lại SQL Server Service
 
 ⚠️ **CỰC KỲ QUAN TRỌNG:** Sau khi hoàn thành các bước trên, bạn **bắt buộc phải Restart dịch vụ SQL Server** để toàn bộ cấu hình mới có hiệu lực.
 
