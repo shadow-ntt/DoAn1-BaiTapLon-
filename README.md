@@ -1,6 +1,7 @@
 # 📋 Mục lục
 
 1. [Hướng Dẫn Cấu Hình SQL Server Express Cho Phép Kết Nối Qua Mạng](#1-hướng-dẫn-cấu-hình-sql-server-express-cho-phép-kết-nối-qua-mạng)
+2. [Kịch bản](#2-kịch-bản)
 
 ## 1.Hướng Dẫn Cấu Hình SQL Server Express Cho Phép Kết Nối Qua Mạng
 
@@ -106,3 +107,41 @@ Nếu không mở cổng 1433, Windows Defender Firewall sẽ chặn các máy t
 1. Nhấn **Windows + R**, gõ **`services.msc`** và ấn **Enter**.
 2. Tìm dịch vụ **SQL Server (SQLEXPRESS)** hoặc **SQL Server (MSSQLSERVER)**.
 3. Chuột phải vào dịch vụ đó ➔ Chọn **Restart**.
+
+## 2.Kịch bản
+
+1. nhân viên đăng nhập
+
+- sai hoặc lỗi hệ thống thì thông báo
+- đúng thì phân quyền cho từng chức năng của nhân viên
+
+2. khách lên đơn hàng
+
+- khách đưa thông tin CCCD
+- ghv dựa vào đó để tìm kiếm
+
+* nếu không tìm thấy thì thêm
+* check thông tin còn lại của khách-> sai thì sửa lại
+  -khách đưa thông tin mã hàng và số lượng
+  -nhân viên bấm duyệt để chuyển qua cho kiểm soát viên
+
+3. Kiểm soát viên check đơn
+
+- nếu số lượng tồn kho thiếu hoặc vượt mức tín dụng thì báo lại cho khách ->nhập lý do và bấm từ chối
+- nếu ok thì bấm duyệt để chuyển tới cho bộ phận kế toán để xử lý tiếp
+  +số lượng tồn kho sẽ bị trừ từ đây
+
+4. Kế toán
+
+- in ra hóa đơn và tờ khai kiện hàng
+- bấm hoàn thành in hóa đơn để phía giao hàng có thể thấy và đi đến bộ phận kế toán để xin giấy tờ cần thiết
+
+5. giao hàng
+
+- cầm hóa đơn và tờ khai kiện hàng đi tới kho để lấy hàng
+- bắt đầu đi giao hàng
+
+* nếu ok thì bấm hoàn thành
+* trường hợp khách bùng thì bấm hoàn trả hàng để chuyển tới bộ phận kho
+  6.Bộ phận kho
+  +trường hợp hoàn hàng, thì sau khi chứng minh được đơn hàng để hoàn hàng thì nhân viên kho bấm hoàn trả hàng và chuyển hàng vào lại trong kho
