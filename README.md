@@ -108,7 +108,7 @@ Nếu không mở cổng 1433, Windows Defender Firewall sẽ chặn các máy t
 2. Tìm dịch vụ **SQL Server (SQLEXPRESS)** hoặc **SQL Server (MSSQLSERVER)**.
 3. Chuột phải vào dịch vụ đó ➔ Chọn **Restart**.
 
-## 2.Kịch bản
+## 2. Kịch bản
 
 1. nhân viên đăng nhập
 
