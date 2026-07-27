@@ -4,7 +4,7 @@
 2. [Kịch bản](#2-kịch-bản)
 3. [Hướng Dẫn Cấu Hình SQL Server Express Cho Phép Kết Nối Qua Mạng](#3-hướng-dẫn-cấu-hình-sql-server-express-cho-phép-kết-nối-qua-mạng)
 
-## 1.Đề bài
+## 1. Đề bài
 
 Công ty LAVITA có hệ thống xử lý đơn đặt hàng được mô tả như sau: Mỗi yêu cầu đặt hàng có dữ liệu cá nhân khách hàng (họ tên, số CMND, địa chỉ, mã bưu chính, thành phố, SĐT, mã số thuế, mức tín dụng) và dữ liệu đặt hàng (mã số đơn, ngày đặt hàng, ngày giao, mã hàng, tên hàng, số lượng, đơn giá). Khi nhận yêu cầu đặt hàng từ khách hàng, giao dịch viên đối chiếu dữ liệu khách hàng trong hồ sơ khách hàng; nếu cần, cập nhật dữ liệu mới từ khách hàng vào hồ sơ khách hàng, sau đó lưu đơn đặt hàng của khách hàng vào hồ sơ đặt hàng. Kiễm soát viên lấy đơn đặt hàng từ hồ sơ khách hàng, kiễm tra mức tín dụng của khách hàng trong hồ sơ khách hàng để xác định đơn có hợp lệ hay không. Kiễm soát viên cũng kiễm tra mức tồn kho của các món hàng được yêu cầu trong hồ sơ tồn kho để xác định các đơn đặt hàng không khả thi (kho không thể đáp ứng). Dữ liệu mô tả các món hàng trong kho gồm mã hàng, tên hàng, mô tả, loại hàng, số lượng tồn đầu kỳ). Các đơn đặt hàng hợp lệ và khả thi được lưu vào hồ sơ đặt hàng hợp lệ. Đơn không hợp lệ hoặc không khả thi được gửi trả về cho khách hàng cùng với lý do. Mỗi khách hàng do một kiễm soát viên phụ trách (có mã số KSV, tên, mức lương, mã số phòng, tên phòng). Hóa đơn bán hàng có tên khách hàng, mã số thuế, các khoản mục cần thanh toán lấy theo đơn đặt hàng, ngày lập hóa đơn. Kế toán viên lấy các đơn đặt hàng hợp lệ từ hồ sơ đặt hàng hợp lệ, lập hóa đơn bán hàng (2 bản), in tờ khai kiện hàng (ghi món hàng và số lượng sẽ đóng gói cho mỗi đơn đặt hàng), và lưu các hóa đơn, tờ khai kiện hàng và đơn đặt hàng vào hồ sơ đặt hàng hoàn chỉnh.
 Nhân viên giao hàng nhận tờ khai kiện hàng, hóa đơn và đơn đặt hàng từ hồ sơ đặt hàng hoàn chỉnh để gửi yêu cầu xuất hàng đến nhà kho (gồm nội dung của đơn đặt hàng và ngày yêu cầu xuất kho), nhận hàng xuất từ kho, cập nhật lượng hàng xuất vào hồ sơ tồn kho, sau đó giao hàng, hóa đơn (1 bản) và tờ khai kiện hàng đến khách hàng để thu tiền. Các hóa đơn đã thu tiền được lưu vào hồ sơ doanh thu.
@@ -47,7 +47,7 @@ Nhân viên giao hàng nhận tờ khai kiện hàng, hóa đơn và đơn đặ
   6.Bộ phận kho
   +trường hợp hoàn hàng, thì sau khi chứng minh được đơn hàng để hoàn hàng thì nhân viên kho bấm hoàn trả hàng và chuyển hàng vào lại trong kho
 
-## 3.Hướng Dẫn Cấu Hình SQL Server Express Cho Phép Kết Nối Qua Mạng
+## 3. Hướng Dẫn Cấu Hình SQL Server Express Cho Phép Kết Nối Qua Mạng
 
 ---
 
