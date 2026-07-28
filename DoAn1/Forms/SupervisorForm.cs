@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using DoAn1.Models.Tables;
+﻿using DoAn1.Models.Tables;
 using DoAn1.Models.Helpers;
 using DoAn1.Services;
 
@@ -22,36 +16,16 @@ namespace DoAn1.Forms
             _currentEmployeeId = currentEmployeeId;
             _supervisorService = new SupervisorService();
             _currentHistoryList = new List<Order>();
-
-            RegisterEvents();
         }
 
-        private void RegisterEvents()
-        {
-            this.Load += SupervisorForm_Load;
-
-            // --- Sự kiện Tab 1: Duyệt đơn ---
-            btnRefresh.Click += BtnRefresh_Click;
-            lstOrders.SelectedIndexChanged += LstOrders_SelectedIndexChanged;
-            lstOrders.DrawItem += LstOrders_DrawItem;
-            btnApprove.Click += BtnApprove_Click;
-            btnReturn.Click += BtnReturn_Click;
-
-            // --- Sự kiện Tab 2: Lịch sử ---
-            btnRefreshHistory.Click += BtnRefreshHistory_Click;
-            txtSearch.TextChanged += TxtSearch_TextChanged;
-            dgvHistoryList.SelectionChanged += DgvHistoryList_SelectionChanged;
-            tabControlMain.SelectedIndexChanged += TabControlMain_SelectedIndexChanged;
-        }
-
-        private void SupervisorForm_Load(object sender, EventArgs e)
+        private void supervisorForm_Load(object sender, EventArgs e)
         {
             RefreshPendingOrders(showNotification: false);
         }
 
         #region --- TAB 1: KIỂM DUYỆT ĐƠN HÀNG ---
 
-        private async void BtnRefresh_Click(object sender, EventArgs e)
+        private async void btnRefresh_Click(object sender, EventArgs e)
         {
             btnRefresh.Enabled = false;
             btnRefresh.Text = "Đang tải...";
@@ -101,7 +75,7 @@ namespace DoAn1.Forms
             }
         }
 
-        private void LstOrders_SelectedIndexChanged(object sender, EventArgs e)
+        private void lstOrders_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (lstOrders.SelectedItem is Order selectedOrder)
             {
@@ -176,7 +150,7 @@ namespace DoAn1.Forms
             txtNotes.Clear();
         }
 
-        private void BtnApprove_Click(object sender, EventArgs e)
+        private void btnApprove_Click(object sender, EventArgs e)
         {
             if (lstOrders.SelectedItem is Order selectedOrder)
             {
@@ -200,7 +174,7 @@ namespace DoAn1.Forms
             }
         }
 
-        private void BtnReturn_Click(object sender, EventArgs e)
+        private void btnReturn_Click(object sender, EventArgs e)
         {
             if (lstOrders.SelectedItem is Order selectedOrder)
             {
@@ -233,7 +207,7 @@ namespace DoAn1.Forms
             }
         }
 
-        private void LstOrders_DrawItem(object sender, DrawItemEventArgs e)
+        private void lstOrders_DrawItem(object sender, DrawItemEventArgs e)
         {
             if (e.Index < 0 || e.Index >= lstOrders.Items.Count) return;
 
@@ -277,7 +251,7 @@ namespace DoAn1.Forms
 
         #region --- TAB 2: LỊCH SỬ KIỂM DUYỆT ---
 
-        private void TabControlMain_SelectedIndexChanged(object sender, EventArgs e)
+        private void tabControlMain_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (tabControlMain.SelectedTab == tabHistory)
             {
@@ -285,7 +259,7 @@ namespace DoAn1.Forms
             }
         }
 
-        private async void BtnRefreshHistory_Click(object sender, EventArgs e)
+        private async void btnRefreshHistory_Click(object sender, EventArgs e)
         {
             btnRefreshHistory.Enabled = false;
             btnRefreshHistory.Text = "Đang tải...";
@@ -333,12 +307,12 @@ namespace DoAn1.Forms
             }
         }
 
-        private void TxtSearch_TextChanged(object sender, EventArgs e)
+        private void txtSearch_TextChanged(object sender, EventArgs e)
         {
             LoadHistoryList(showNotification: false);
         }
 
-        private void DgvHistoryList_SelectionChanged(object sender, EventArgs e)
+        private void dgvHistoryList_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvHistoryList.SelectedRows.Count > 0)
             {

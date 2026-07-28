@@ -12,34 +12,7 @@ namespace DoAn1.Forms
         public WarehouseForm()
         {
             InitializeComponent();
-            RegisterEvents();
         }
-
-        #region Event Wiring (Tự động gán cứng mọi sự kiện)
-
-        private void RegisterEvents()
-        {
-            // Sự kiện Load Form
-            this.Load += WarehouseForm_Load;
-
-            // Sự kiện Tab 1: Quản lý tồn kho
-            btnSearch.Click += btnSearch_Click;
-            btnAdd.Click += btnAdd_Click;
-            btnEdit.Click += btnEdit_Click;
-            btnDelete.Click += btnDelete_Click;
-            btnClear.Click += btnClear_Click;
-            dgvProducts.CellClick += dgvProducts_CellClick;
-            dgvProducts.SelectionChanged += dgvProducts_SelectionChanged;
-
-            // Sự kiện Tab 2: Duyệt đơn trả hàng
-            btnSearchReturns.Click += btnSearchReturns_Click;
-            btnRefreshReturns.Click += btnRefreshReturns_Click;
-            btnApproveReturn.Click += btnApproveReturn_Click;
-            dgvReturnOrders.CellClick += dgvReturnOrders_CellClick;
-            dgvReturnOrders.SelectionChanged += dgvReturnOrders_SelectionChanged;
-        }
-
-        #endregion
 
         private void WarehouseForm_Load(object sender, EventArgs e)
         {
@@ -74,6 +47,7 @@ namespace DoAn1.Forms
             {
                 MessageBox.Show(result.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            ClearForm();
         }
 
         /// <summary>
@@ -103,7 +77,6 @@ namespace DoAn1.Forms
 
             if (result.IsSuccess)
             {
-                ClearForm();
                 LoadProductData();
             }
         }
@@ -137,7 +110,6 @@ namespace DoAn1.Forms
 
             if (result.IsSuccess)
             {
-                ClearForm();
                 LoadProductData();
             }
         }
@@ -166,7 +138,6 @@ namespace DoAn1.Forms
 
                 if (result.IsSuccess)
                 {
-                    ClearForm();
                     LoadProductData();
                 }
             }
@@ -177,7 +148,6 @@ namespace DoAn1.Forms
         /// </summary>
         private void btnClear_Click(object sender, EventArgs e)
         {
-            ClearForm();
             LoadProductData();
             MessageBox.Show("Đã làm mới dữ liệu và xóa trắng thông tin nhập kho!", "Thông báo",
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -185,6 +155,7 @@ namespace DoAn1.Forms
 
         private void ClearForm()
         {
+            dgvProducts.ClearSelection();
             txtProductId.Clear();
             txtProductName.Clear();
             txtDescription.Clear();
@@ -192,7 +163,6 @@ namespace DoAn1.Forms
             txtUnitPrice.Clear();
             txtOpeningQuantity.Clear();
             txtSearch.Clear();
-            dgvProducts.ClearSelection();
         }
 
         private bool ValidateInput(out decimal price, out int qty)

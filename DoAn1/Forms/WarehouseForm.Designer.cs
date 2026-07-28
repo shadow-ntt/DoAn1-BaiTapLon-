@@ -159,6 +159,8 @@
             dgvProducts.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvProducts.Size = new Size(896, 668);
             dgvProducts.TabIndex = 1;
+            dgvProducts.CellClick += dgvProducts_CellClick;
+            dgvProducts.SelectionChanged += dgvProducts_SelectionChanged;
             // 
             // pnlActions
             // 
@@ -197,6 +199,7 @@
             btnSearch.TabIndex = 1;
             btnSearch.Text = "TÌM KIẾM";
             btnSearch.UseVisualStyleBackColor = false;
+            btnSearch.Click += btnSearch_Click;
             // 
             // btnAdd
             // 
@@ -211,6 +214,7 @@
             btnAdd.TabIndex = 2;
             btnAdd.Text = "NHẬP KHO (+)";
             btnAdd.UseVisualStyleBackColor = false;
+            btnAdd.Click += btnAdd_Click;
             // 
             // btnEdit
             // 
@@ -225,6 +229,7 @@
             btnEdit.TabIndex = 3;
             btnEdit.Text = "CẬP NHẬT (✎)";
             btnEdit.UseVisualStyleBackColor = false;
+            btnEdit.Click += btnEdit_Click;
             // 
             // btnDelete
             // 
@@ -239,6 +244,7 @@
             btnDelete.TabIndex = 4;
             btnDelete.Text = "XÓA HÀNG (✗)";
             btnDelete.UseVisualStyleBackColor = false;
+            btnDelete.Click += btnDelete_Click;
             // 
             // btnClear
             // 
@@ -253,6 +259,7 @@
             btnClear.TabIndex = 5;
             btnClear.Text = "LÀM MỚI (↻)";
             btnClear.UseVisualStyleBackColor = false;
+            btnClear.Click += btnClear_Click;
             // 
             // pnlSidebar
             // 
@@ -483,6 +490,8 @@
             dgvReturnOrders.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvReturnOrders.Size = new Size(500, 703);
             dgvReturnOrders.TabIndex = 1;
+            dgvReturnOrders.CellClick += dgvReturnOrders_CellClick;
+            dgvReturnOrders.SelectionChanged += dgvReturnOrders_SelectionChanged;
             // 
             // pnlReturnSearch
             // 
@@ -531,6 +540,7 @@
             btnSearchReturns.TabIndex = 2;
             btnSearchReturns.Text = "TÌM";
             btnSearchReturns.UseVisualStyleBackColor = false;
+            btnSearchReturns.Click += btnSearchReturns_Click;
             // 
             // btnRefreshReturns
             // 
@@ -546,6 +556,7 @@
             btnRefreshReturns.TabIndex = 3;
             btnRefreshReturns.Text = "TẢI LẠI";
             btnRefreshReturns.UseVisualStyleBackColor = false;
+            btnRefreshReturns.Click += btnRefreshReturns_Click;
             // 
             // pnlReturnDetails
             // 
@@ -645,6 +656,7 @@
             txtReturnCustomer.ReadOnly = true;
             txtReturnCustomer.Size = new Size(540, 30);
             txtReturnCustomer.TabIndex = 6;
+            txtReturnCustomer.TextChanged += txtReturnCustomer_TextChanged;
             // 
             // lblReturnReasonDetail
             // 
@@ -733,6 +745,7 @@
             btnApproveReturn.TabIndex = 11;
             btnApproveReturn.Text = "XÁC NHẬN NHẬP KHO & DUYỆT TRẢ HÀNG";
             btnApproveReturn.UseVisualStyleBackColor = false;
+            btnApproveReturn.Click += btnApproveReturn_Click;
             // 
             // WarehouseForm
             // 
@@ -746,6 +759,7 @@
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Lavita Warehouse Management";
             WindowState = FormWindowState.Maximized;
+            Load += WarehouseForm_Load;
             tabControlWarehouse.ResumeLayout(false);
             tabInventory.ResumeLayout(false);
             pnlMain.ResumeLayout(false);

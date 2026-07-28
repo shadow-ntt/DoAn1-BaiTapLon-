@@ -365,12 +365,12 @@
             // labelSumMoney
             // 
             labelSumMoney.AutoSize = true;
-            labelSumMoney.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
-            labelSumMoney.ForeColor = Color.FromArgb(220, 38, 38);
             labelSumMoney.Location = new Point(20, 490);
             labelSumMoney.Name = "labelSumMoney";
             labelSumMoney.Size = new Size(191, 30);
             labelSumMoney.TabIndex = 8;
+            labelSumMoney.Font = new Font("Segoe UI", 12, FontStyle.Bold);
+            labelSumMoney.ForeColor = Color.FromArgb(192, 57, 43);
             labelSumMoney.Text = "Tổng tiền: 0 VNĐ";
             // 
             // buttonDelete
@@ -454,7 +454,7 @@
             dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dataGridView1.Size = new Size(700, 330);
             dataGridView1.TabIndex = 7;
-            dataGridView1.SelectionChanged += dataGridView1_SelectionChanged;
+           dataGridView1.SelectionChanged += dataGridView1_SelectionChanged;
             // 
             // Column1
             // 

@@ -124,6 +124,7 @@ namespace DoAn1.Forms
             tabControlMain.SelectedIndex = 0;
             tabControlMain.Size = new Size(1486, 1055);
             tabControlMain.TabIndex = 0;
+            tabControlMain.SelectedIndexChanged += tabControlMain_SelectedIndexChanged;
             // 
             // tabPending
             // 
@@ -171,6 +172,8 @@ namespace DoAn1.Forms
             lstOrders.Name = "lstOrders";
             lstOrders.Size = new Size(338, 929);
             lstOrders.TabIndex = 1;
+            lstOrders.SelectedIndexChanged += lstOrders_SelectedIndexChanged;
+            lstOrders.DrawItem += lstOrders_DrawItem;
             // 
             // pnlLeftHeader
             // 
@@ -198,6 +201,7 @@ namespace DoAn1.Forms
             btnRefresh.TabIndex = 1;
             btnRefresh.Text = "Làm mới";
             btnRefresh.UseVisualStyleBackColor = false;
+            btnRefresh.Click += btnRefresh_Click;
             // 
             // lblLeftTitle
             // 
@@ -431,6 +435,7 @@ namespace DoAn1.Forms
             btnApprove.TabIndex = 0;
             btnApprove.Text = "Duyệt đơn";
             btnApprove.UseVisualStyleBackColor = false;
+            btnApprove.Click += btnApprove_Click;
             // 
             // btnReturn
             // 
@@ -445,6 +450,7 @@ namespace DoAn1.Forms
             btnReturn.TabIndex = 1;
             btnReturn.Text = "Trả / Từ chối";
             btnReturn.UseVisualStyleBackColor = false;
+            btnReturn.Click += btnReturn_Click;
             // 
             // tabHistory
             // 
@@ -500,6 +506,7 @@ namespace DoAn1.Forms
             dgvHistoryList.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvHistoryList.Size = new Size(549, 944);
             dgvHistoryList.TabIndex = 1;
+            dgvHistoryList.SelectionChanged += dgvHistoryList_SelectionChanged;
             // 
             // colHOrderId
             // 
@@ -561,6 +568,7 @@ namespace DoAn1.Forms
             btnRefreshHistory.TabIndex = 2;
             btnRefreshHistory.Text = "Làm mới";
             btnRefreshHistory.UseVisualStyleBackColor = false;
+            btnRefreshHistory.Click += btnRefreshHistory_Click;
             // 
             // txtSearch
             // 
@@ -572,6 +580,7 @@ namespace DoAn1.Forms
             txtSearch.PlaceholderText = "Nhập mã đơn hoặc tên khách hàng...";
             txtSearch.Size = new Size(336, 30);
             txtSearch.TabIndex = 1;
+            txtSearch.TextChanged += txtSearch_TextChanged;
             // 
             // lblSearch
             // 
@@ -729,6 +738,7 @@ namespace DoAn1.Forms
             Name = "SupervisorForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Hệ thống duyệt đơn hàng & Tra cứu lịch sử";
+            Load += supervisorForm_Load;
             tabControlMain.ResumeLayout(false);
             tabPending.ResumeLayout(false);
             splitMain.Panel1.ResumeLayout(false);

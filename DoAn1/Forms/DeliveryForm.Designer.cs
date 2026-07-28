@@ -149,6 +149,7 @@
             btnRefreshPending.TabIndex = 2;
             btnRefreshPending.Text = "TẢI LẠI";
             btnRefreshPending.UseVisualStyleBackColor = false;
+            btnRefreshPending.Click += BtnRefreshPending_Click;
             // 
             // lstPendingOrders
             // 
@@ -159,6 +160,7 @@
             lstPendingOrders.Name = "lstPendingOrders";
             lstPendingOrders.Size = new Size(469, 602);
             lstPendingOrders.TabIndex = 3;
+            lstPendingOrders.SelectedIndexChanged += LstPendingOrders_SelectedIndexChanged;
             // 
             // btnStartDelivery
             // 
@@ -174,6 +176,7 @@
             btnStartDelivery.TabIndex = 4;
             btnStartDelivery.Text = "GIAO HÀNG";
             btnStartDelivery.UseVisualStyleBackColor = false;
+            btnStartDelivery.Click += BtnStartDelivery_Click;
             // 
             // tabDelivering
             // 
@@ -189,7 +192,7 @@
             tabDelivering.Margin = new Padding(3, 4, 3, 4);
             tabDelivering.Name = "tabDelivering";
             tabDelivering.Padding = new Padding(10, 12, 10, 12);
-            tabDelivering.Size = new Size(492, 814);
+            tabDelivering.Size = new Size(492, 815);
             tabDelivering.TabIndex = 1;
             tabDelivering.Text = "Đang giao";
             tabDelivering.UseVisualStyleBackColor = true;
@@ -226,6 +229,7 @@
             btnRefreshDelivering.TabIndex = 2;
             btnRefreshDelivering.Text = "TẢI LẠI";
             btnRefreshDelivering.UseVisualStyleBackColor = false;
+            btnRefreshDelivering.Click += BtnRefreshDelivering_Click;
             // 
             // lstDeliveringOrders
             // 
@@ -236,6 +240,7 @@
             lstDeliveringOrders.Name = "lstDeliveringOrders";
             lstDeliveringOrders.Size = new Size(469, 395);
             lstDeliveringOrders.TabIndex = 3;
+            lstDeliveringOrders.SelectedIndexChanged += LstDeliveringOrders_SelectedIndexChanged;
             // 
             // btnConfirmSuccess
             // 
@@ -244,19 +249,20 @@
             btnConfirmSuccess.FlatStyle = FlatStyle.Flat;
             btnConfirmSuccess.Font = new Font("Segoe UI", 10.5F, FontStyle.Bold);
             btnConfirmSuccess.ForeColor = Color.White;
-            btnConfirmSuccess.Location = new Point(10, 502);
+            btnConfirmSuccess.Location = new Point(10, 503);
             btnConfirmSuccess.Margin = new Padding(3, 4, 3, 4);
             btnConfirmSuccess.Name = "btnConfirmSuccess";
             btnConfirmSuccess.Size = new Size(469, 56);
             btnConfirmSuccess.TabIndex = 4;
             btnConfirmSuccess.Text = "XÁC NHẬN GIAO THÀNH CÔNG";
             btnConfirmSuccess.UseVisualStyleBackColor = false;
+            btnConfirmSuccess.Click += BtnConfirmSuccess_Click;
             // 
             // lblReturnReason
             // 
             lblReturnReason.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             lblReturnReason.AutoSize = true;
-            lblReturnReason.Location = new Point(10, 571);
+            lblReturnReason.Location = new Point(10, 572);
             lblReturnReason.Name = "lblReturnReason";
             lblReturnReason.Size = new Size(130, 25);
             lblReturnReason.TabIndex = 5;
@@ -265,7 +271,7 @@
             // txtReturnReason
             // 
             txtReturnReason.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            txtReturnReason.Location = new Point(10, 609);
+            txtReturnReason.Location = new Point(10, 610);
             txtReturnReason.Margin = new Padding(3, 4, 3, 4);
             txtReturnReason.Multiline = true;
             txtReturnReason.Name = "txtReturnReason";
@@ -279,13 +285,14 @@
             btnConfirmReturn.FlatStyle = FlatStyle.Flat;
             btnConfirmReturn.Font = new Font("Segoe UI", 10.5F, FontStyle.Bold);
             btnConfirmReturn.ForeColor = Color.White;
-            btnConfirmReturn.Location = new Point(10, 728);
+            btnConfirmReturn.Location = new Point(10, 729);
             btnConfirmReturn.Margin = new Padding(3, 4, 3, 4);
             btnConfirmReturn.Name = "btnConfirmReturn";
             btnConfirmReturn.Size = new Size(469, 56);
             btnConfirmReturn.TabIndex = 7;
             btnConfirmReturn.Text = "XÁC NHẬN TRẢ HÀNG";
             btnConfirmReturn.UseVisualStyleBackColor = false;
+            btnConfirmReturn.Click += BtnConfirmReturn_Click;
             // 
             // tabHistory
             // 
@@ -297,7 +304,7 @@
             tabHistory.Margin = new Padding(3, 4, 3, 4);
             tabHistory.Name = "tabHistory";
             tabHistory.Padding = new Padding(10, 12, 10, 12);
-            tabHistory.Size = new Size(492, 814);
+            tabHistory.Size = new Size(492, 815);
             tabHistory.TabIndex = 2;
             tabHistory.Text = "Lịch sử giao hàng";
             tabHistory.UseVisualStyleBackColor = true;
@@ -334,6 +341,7 @@
             btnRefreshHistory.TabIndex = 2;
             btnRefreshHistory.Text = "TẢI LẠI";
             btnRefreshHistory.UseVisualStyleBackColor = false;
+            btnRefreshHistory.Click += BtnRefreshHistory_Click;
             // 
             // dgvDeliveryHistory
             // 
@@ -350,8 +358,9 @@
             dgvDeliveryHistory.RowHeadersWidth = 51;
             dgvDeliveryHistory.RowTemplate.Height = 28;
             dgvDeliveryHistory.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvDeliveryHistory.Size = new Size(469, 721);
+            dgvDeliveryHistory.Size = new Size(469, 722);
             dgvDeliveryHistory.TabIndex = 3;
+            dgvDeliveryHistory.SelectionChanged += DgvDeliveryHistory_SelectionChanged;
             // 
             // pnlDetails
             // 
@@ -456,7 +465,7 @@
             lblInvoiceDate.AutoSize = true;
             lblInvoiceDate.Location = new Point(20, 350);
             lblInvoiceDate.Name = "lblInvoiceDate";
-            lblInvoiceDate.Size = new Size(168, 25);
+            lblInvoiceDate.Size = new Size(159, 25);
             lblInvoiceDate.TabIndex = 9;
             lblInvoiceDate.Text = "Ngày lập hóa đơn:";
             // 

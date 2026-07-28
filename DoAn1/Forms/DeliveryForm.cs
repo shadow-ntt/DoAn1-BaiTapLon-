@@ -29,21 +29,12 @@ namespace DoAn1.Forms
 
             // Tab 1
             txtSearchPending.TextChanged += (s, e) => LoadPendingOrders();
-            btnRefreshPending.Click += BtnRefreshPending_Click;
-            lstPendingOrders.SelectedIndexChanged += LstPendingOrders_SelectedIndexChanged;
-            btnStartDelivery.Click += BtnStartDelivery_Click;
 
             // Tab 2
             txtSearchDelivering.TextChanged += (s, e) => LoadDeliveringOrders();
-            btnRefreshDelivering.Click += BtnRefreshDelivering_Click;
-            lstDeliveringOrders.SelectedIndexChanged += LstDeliveringOrders_SelectedIndexChanged;
-            btnConfirmSuccess.Click += BtnConfirmSuccess_Click;
-            btnConfirmReturn.Click += BtnConfirmReturn_Click;
 
             // Tab 3
             txtSearchHistory.TextChanged += (s, e) => LoadDeliveryHistory();
-            btnRefreshHistory.Click += BtnRefreshHistory_Click;
-            dgvDeliveryHistory.SelectionChanged += DgvDeliveryHistory_SelectionChanged;
         }
 
         private void DeliveryForm_Load(object sender, EventArgs e)
@@ -91,7 +82,8 @@ namespace DoAn1.Forms
 
                 if (_pendingOrders != null && _pendingOrders.Count > 0)
                 {
-                    var displayList = _pendingOrders.Select(o => new {
+                    var displayList = _pendingOrders.Select(o => new
+                    {
                         OrderData = o,
                         DisplayText = $"#{o.OrderId} — Khách: {o.Customer?.FullName ?? "Khách lẻ"}"
                     }).ToList();
@@ -184,7 +176,8 @@ namespace DoAn1.Forms
 
                 if (_deliveringOrders != null && _deliveringOrders.Count > 0)
                 {
-                    var displayList = _deliveringOrders.Select(d => new {
+                    var displayList = _deliveringOrders.Select(d => new
+                    {
                         DeliveryData = d,
                         DisplayText = $"#{d.OrderId} — Khách: {d.Order?.Customer?.FullName ?? "Khách lẻ"}"
                     }).ToList();
@@ -370,5 +363,6 @@ namespace DoAn1.Forms
         }
 
         #endregion
+
     }
 }

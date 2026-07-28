@@ -4,150 +4,95 @@ using DoAn1.Models.Results;
 using DoAn1.Models.Tables;
 using System.ComponentModel;
 
-
 namespace DoAn1.Forms
 {
     public partial class EmployeeForm : Form
     {
-        private CustomerService customerService;
-        private OrderService orderService;
-        private Customer currentCustomer;
-        private BindingList<OrderGridView> orderGridView;
-        public int OrderId;
-        public int EmployeeId;
+        private readonly CustomerService _customerService;
+        private readonly OrderService _orderService;
+        private readonly BindingList<OrderGridView> _orderGridView;
 
-        public EmployeeForm(int EmployeeId)
+        private Customer _currentCustomer;
+
+        public EmployeeForm(int employeeId)
         {
             InitializeComponent();
-            customerService = new CustomerService();
-            orderService = new OrderService();
-            orderGridView = new BindingList<OrderGridView>();
-            OrderId = -1;
-            this.EmployeeId = EmployeeId;
+
+            _customerService = new CustomerService();
+            _orderService = new OrderService();
+            _orderGridView = new BindingList<OrderGridView>();
 
             dataGridView1.AutoGenerateColumns = false;
-            dataGridView1.DataSource = orderGridView;
-            dataGridView1.SelectionChanged += dataGridView1_SelectionChanged;
+            dataGridView1.DataSource = _orderGridView;
 
-            // Hiển thị trạng thái giỏ hàng & tổng tiền ban đầu (0 VNĐ)
-            resetGridView();
-        }
-
-
-        private void panel1_Paint(object sender, PaintEventArgs e)
-        {
+            ResetGridView();
         }
 
         #region --- QUẢN LÝ KHÁCH HÀNG ---
 
         private void buttonSearchCustomer_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(textIdentityNumber.Text))
+            string identity = textIdentityNumber.Text.Trim();
+            if (string.IsNullOrWhiteSpace(identity))
             {
                 MessageBox.Show("Vui lòng nhập số CMND/CCCD để tìm kiếm.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            ProcessResult<Customer> processResult = customerService.SearchCustomer(this.textIdentityNumber.Text);
-            MessageBox.Show(processResult.Message, "Thông báo", MessageBoxButtons.OK, processResult.IsSuccess ? MessageBoxIcon.Information : MessageBoxIcon.Error);
+            ProcessResult<Customer> result = _customerService.SearchCustomer(identity);
+            MessageBox.Show(result.Message, "Thông báo", MessageBoxButtons.OK, result.IsSuccess ? MessageBoxIcon.Information : MessageBoxIcon.Error);
 
-            if (processResult.IsSuccess)
+            if (result.IsSuccess && result.Data != null)
             {
-                currentCustomer = processResult.Data;
-                textIdentityNumber.Text = currentCustomer.IdentityNumber;
-                textFullName.Text = currentCustomer.FullName;
-                textAddress.Text = currentCustomer.Address;
-                textCity.Text = currentCustomer.City;
-                textPhoneNumber.Text = currentCustomer.PhoneNumber;
-                textPostalCode.Text = currentCustomer.PostalCode;
-                textTaxCode.Text = currentCustomer.TaxCode;
-                textCreditLimit.Text = currentCustomer.CreditLimit.ToString();
+                _currentCustomer = result.Data;
+                FillCustomerUI(_currentCustomer);
             }
         }
 
         private void buttonUpdateCustomer_Click(object sender, EventArgs e)
         {
-            if (currentCustomer == null)
+            if (_currentCustomer == null)
             {
                 MessageBox.Show("Vui lòng tìm kiếm khách hàng trước khi cập nhật.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if (!validateInputCustomer()) return;
+            if (!ValidateInputCustomer()) return;
 
-            ProcessResult<Customer> processResult = customerService.UpdateCustomer(currentCustomer.CustomerId, GetCustomerFromTextBoxWithoutValidate());
-            MessageBox.Show(processResult.Message, "Thông báo", MessageBoxButtons.OK, processResult.IsSuccess ? MessageBoxIcon.Information : MessageBoxIcon.Error);
+            ProcessResult<Customer> result = _customerService.UpdateCustomer(_currentCustomer.CustomerId, GetCustomerFromTextBoxWithoutValidate());
+            MessageBox.Show(result.Message, "Thông báo", MessageBoxButtons.OK, result.IsSuccess ? MessageBoxIcon.Information : MessageBoxIcon.Error);
 
-            if (processResult.IsSuccess)
+            if (result.IsSuccess)
             {
-                currentCustomer = processResult.Data;
+                _currentCustomer = result.Data;
             }
         }
 
         private void buttonAddCustomer_Click(object sender, EventArgs e)
         {
-            if (!validateInputCustomer()) return;
+            if (!ValidateInputCustomer()) return;
 
             Customer newCustomer = GetCustomerFromTextBoxWithoutValidate();
-            ProcessResult<Customer> processResult = customerService.AddCustomer(newCustomer);
-            MessageBox.Show(processResult.Message, "Thông báo", MessageBoxButtons.OK, processResult.IsSuccess ? MessageBoxIcon.Information : MessageBoxIcon.Error);
+            ProcessResult<Customer> result = _customerService.AddCustomer(newCustomer);
+            MessageBox.Show(result.Message, "Thông báo", MessageBoxButtons.OK, result.IsSuccess ? MessageBoxIcon.Information : MessageBoxIcon.Error);
 
-            if (processResult.IsSuccess)
+            if (result.IsSuccess)
             {
-                currentCustomer = processResult.Data;
+                _currentCustomer = result.Data;
             }
         }
 
-        private bool validateInputCustomer()
+        private bool ValidateInputCustomer()
         {
-            if (string.IsNullOrWhiteSpace(textIdentityNumber.Text))
-            {
-                MessageBox.Show("Vui lòng nhập số CMND/CCCD.", "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                textIdentityNumber.Focus();
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(textFullName.Text))
-            {
-                MessageBox.Show("Vui lòng nhập họ tên.", "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                textFullName.Focus();
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(textAddress.Text))
-            {
-                MessageBox.Show("Vui lòng nhập địa chỉ.", "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                textAddress.Focus();
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(textCity.Text))
-            {
-                MessageBox.Show("Vui lòng nhập thành phố.", "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                textCity.Focus();
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(textPhoneNumber.Text))
-            {
-                MessageBox.Show("Vui lòng nhập số điện thoại.", "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                textPhoneNumber.Focus();
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(textPostalCode.Text))
-            {
-                MessageBox.Show("Vui lòng nhập mã bưu chính.", "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                textPostalCode.Focus();
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(textTaxCode.Text))
-            {
-                MessageBox.Show("Vui lòng nhập mã số thuế.", "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                textTaxCode.Focus();
-                return false;
-            }
-            if (!decimal.TryParse(textCreditLimit.Text, out _))
-            {
-                MessageBox.Show("Mức tín dụng không hợp lệ.", "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                textCreditLimit.Focus();
-                return false;
-            }
+            if (string.IsNullOrWhiteSpace(textIdentityNumber.Text)) return ShowValidationError("Vui lòng nhập số CMND/CCCD.", textIdentityNumber);
+            if (string.IsNullOrWhiteSpace(textFullName.Text)) return ShowValidationError("Vui lòng nhập họ tên.", textFullName);
+            if (string.IsNullOrWhiteSpace(textAddress.Text)) return ShowValidationError("Vui lòng nhập địa chỉ.", textAddress);
+            if (string.IsNullOrWhiteSpace(textCity.Text)) return ShowValidationError("Vui lòng nhập thành phố.", textCity);
+            if (string.IsNullOrWhiteSpace(textPhoneNumber.Text)) return ShowValidationError("Vui lòng nhập số điện thoại.", textPhoneNumber);
+            if (string.IsNullOrWhiteSpace(textPostalCode.Text)) return ShowValidationError("Vui lòng nhập mã bưu chính.", textPostalCode);
+            if (string.IsNullOrWhiteSpace(textTaxCode.Text)) return ShowValidationError("Vui lòng nhập mã số thuế.", textTaxCode);
+            if (!decimal.TryParse(textCreditLimit.Text, out _)) return ShowValidationError("Mức tín dụng không hợp lệ.", textCreditLimit);
+
             return true;
         }
 
@@ -167,75 +112,65 @@ namespace DoAn1.Forms
             };
         }
 
+        private void FillCustomerUI(Customer customer)
+        {
+            textIdentityNumber.Text = customer.IdentityNumber;
+            textFullName.Text = customer.FullName;
+            textAddress.Text = customer.Address;
+            textCity.Text = customer.City;
+            textPhoneNumber.Text = customer.PhoneNumber;
+            textPostalCode.Text = customer.PostalCode;
+            textTaxCode.Text = customer.TaxCode;
+            textCreditLimit.Text = customer.CreditLimit.ToString();
+        }
+
         #endregion
 
         #region --- QUẢN LÝ ĐƠN HÀNG & SẢN PHẨM ---
 
-        private bool validateInputOrder()
+        private bool ValidateInputOrder()
         {
-            if (!int.TryParse(textBProductCode.Text, out _))
-            {
-                MessageBox.Show("Mã sản phẩm phải là một số nguyên hợp lệ.", "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                textBProductCode.Focus();
-                return false;
-            }
-            if (!int.TryParse(textBoxQuanity.Text, out int quantity) || quantity <= 0)
-            {
-                MessageBox.Show("Số lượng sản phẩm không hợp lệ (phải lớn hơn 0).", "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                textBoxQuanity.Focus();
-                return false;
-            }
-            if (dateTimePickerDelivery.Value.Date < DateTime.Today)
-            {
-                MessageBox.Show("Thời gian dự kiến vận chuyển không thể nằm trong quá khứ.", "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                dateTimePickerDelivery.Focus();
-                return false;
-            }
+            if (!int.TryParse(textBProductCode.Text, out _)) return ShowValidationError("Mã sản phẩm phải là một số nguyên hợp lệ.", textBProductCode);
+            if (!int.TryParse(textBoxQuanity.Text, out int quantity) || quantity <= 0) return ShowValidationError("Số lượng sản phẩm không hợp lệ (phải lớn hơn 0).", textBoxQuanity);
+            if (dateTimePickerDelivery.Value.Date < DateTime.Today) return ShowValidationError("Thời gian dự kiến vận chuyển không thể nằm trong quá khứ.", dateTimePickerDelivery);
+
             return true;
         }
 
-        /// <summary>
-        /// Cập nhật lại hiển thị DataGridView và tự động tính Tổng tiền Real-Time
-        /// </summary>
-        public void resetGridView()
+        public void ResetGridView()
         {
-            orderGridView.ResetBindings();
+            _orderGridView.ResetBindings();
 
-            // 1. Tự động tính tổng tiền từ tất cả sản phẩm có trong giỏ hàng
-            decimal totalMoney = orderGridView != null ? orderGridView.Sum(x => x.Quantity * x.UnitPrice) : 0;
+            decimal totalMoney = _orderGridView.Sum(x => x.Quantity * x.UnitPrice);
 
-            // 2. Hiển thị lên Label với định dạng phân cách hàng nghìn (VD: 1,500,000 VNĐ)
             if (labelSumMoney != null)
             {
                 labelSumMoney.Text = $"Tổng tiền: {totalMoney:N0} VNĐ";
-                labelSumMoney.Font = new Font("Segoe UI", 12, FontStyle.Bold);
-                labelSumMoney.ForeColor = Color.FromArgb(192, 57, 43); // Màu đỏ/cam nổi bật
             }
         }
 
         private void buttonAddProduct_Click(object sender, EventArgs e)
         {
-            if (!validateInputOrder()) return;
-            if (!validateInputCustomer()) return;
+            if (!ValidateInputOrder() || !ValidateInputCustomer()) return;
 
-            int productId = int.Parse(this.textBProductCode.Text);
-            int quantity = int.Parse(this.textBoxQuanity.Text);
+            int productId = int.Parse(textBProductCode.Text);
+            int quantity = int.Parse(textBoxQuanity.Text);
 
-            ProcessResult<Product> rsP = orderService.getProduct(productId);
+            ProcessResult<Product> rsP = _orderService.getProduct(productId);
             if (!rsP.IsSuccess)
             {
                 MessageBox.Show(rsP.Message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            var item = orderGridView.FirstOrDefault(x => x.ProductId == productId);
+            var item = _orderGridView.FirstOrDefault(x => x.ProductId == productId);
             if (item != null)
             {
                 item.Quantity += quantity;
             }
             else
             {
-                orderGridView.Add(new OrderGridView
+                _orderGridView.Add(new OrderGridView
                 {
                     ProductId = rsP.Data.ProductId,
                     ProductName = rsP.Data.ProductName,
@@ -244,125 +179,107 @@ namespace DoAn1.Forms
                 });
             }
 
-            // Gọi hàm resetGridView để cập nhật cả DataGridView lẫn Tổng tiền
-            resetGridView();
+            ResetGridView();
         }
 
         private void buttonUpdate_Click(object sender, EventArgs e)
         {
-            if (currentCustomer == null)
+            if (_currentCustomer == null)
             {
                 MessageBox.Show("Vui lòng kiểm tra thông tin khách hàng.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (!validateInputOrder()) return;
+            if (!ValidateInputOrder()) return;
 
-            int productId = int.Parse(this.textBProductCode.Text);
-            int quantity = int.Parse(this.textBoxQuanity.Text);
+            int productId = int.Parse(textBProductCode.Text);
+            int quantity = int.Parse(textBoxQuanity.Text);
 
-            OrderGridView og = orderGridView.FirstOrDefault(z => z.ProductId == productId);
-            if (og != null)
+            OrderGridView item = _orderGridView.FirstOrDefault(z => z.ProductId == productId);
+            if (item != null)
             {
-                if (OrderId >= 0)
-                {
-                    ProcessResult<OrderGridView> rs = orderService.UpdateOrder(OrderId, productId, quantity);
-                    if (!rs.IsSuccess)
-                    {
-                        MessageBox.Show(rs.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-                }
-
-                og.Quantity = quantity;
-
-                // Tính lại tổng tiền sau khi cập nhật số lượng
-                resetGridView();
-                MessageBox.Show("Cập nhật số lượng sản phẩm thành công.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                item.Quantity = quantity;
+                ResetGridView();
+                MessageBox.Show("Cập nhật số lượng sản phẩm trong giỏ thành công.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                MessageBox.Show("Sản phẩm không có sẵn trong danh sách giỏ hàng hiện tại.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Sản phẩm không có trong giỏ hàng.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
         private void buttonDelete_Click(object sender, EventArgs e)
         {
-            if (currentCustomer == null)
+            if (_currentCustomer == null)
             {
                 MessageBox.Show("Vui lòng kiểm tra thông tin khách hàng.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (string.IsNullOrWhiteSpace(textBProductCode.Text) || !int.TryParse(textBProductCode.Text, out int productId))
+            if (!int.TryParse(textBProductCode.Text, out int productId))
             {
                 MessageBox.Show("Mã sản phẩm cần xóa không hợp lệ.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            OrderGridView og = orderGridView.FirstOrDefault(z => z.ProductId == productId);
-            if (og != null)
+            OrderGridView item = _orderGridView.FirstOrDefault(z => z.ProductId == productId);
+            if (item != null)
             {
-                orderGridView.Remove(og);
-                if (OrderId >= 0)
-                {
-                    ProcessResult<OrderGridView> rs = orderService.DeleteProduct(OrderId, productId);
-                    if (!rs.IsSuccess)
-                    {
-                        MessageBox.Show(rs.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-                }
-
-                // Cập nhật lại giao diện & trừ tổng tiền
-                resetGridView();
+                _orderGridView.Remove(item);
+                ResetGridView();
                 MessageBox.Show("Đã xóa sản phẩm khỏi giỏ hàng.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                MessageBox.Show("Sản phẩm chọn xóa không nằm trong danh sách.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Sản phẩm chọn xóa không nằm trong danh sách giỏ hàng.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
         private void buttonSubmit_Click(object sender, EventArgs e)
         {
-            if (!validateInputCustomer()) return;
+            if (!ValidateInputCustomer()) return;
 
-            if (orderGridView.Count <= 0)
+            if (_orderGridView.Count <= 0)
             {
                 MessageBox.Show("Chưa có sản phẩm nào trong danh sách đặt hàng.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (currentCustomer == null)
+            if (_currentCustomer == null)
             {
                 MessageBox.Show("Vui lòng thực hiện tìm kiếm hoặc tạo thông tin khách hàng trước.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            ProcessResult<Order> order = orderService.AddOrder(currentCustomer.CustomerId, EmployeeId, dateTimePickerDelivery.Value);
+            // Tạo đơn hàng mới trong CSDL
+            ProcessResult<Order> orderResult = _orderService.AddOrder(_currentCustomer.CustomerId, 0, dateTimePickerDelivery.Value);
 
-            if (order.IsSuccess && order.Data != null)
+            if (orderResult.IsSuccess && orderResult.Data != null)
             {
-                OrderId = order.Data.OrderId;
-                foreach (var item in orderGridView)
+                int newOrderId = orderResult.Data.OrderId;
+
+                // Thêm chi tiết đơn hàng vào CSDL
+                foreach (var item in _orderGridView)
                 {
-                    orderService.AddProduct(order.Data.OrderId, item.ProductId, item.Quantity);
+                    _orderService.AddProduct(newOrderId, item.ProductId, item.Quantity);
                 }
+
                 MessageBox.Show("Thêm đơn hàng thành công vào cơ sở dữ liệu!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // Dọn dẹp giỏ hàng & reset tổng tiền về 0 VNĐ
-                orderGridView.Clear();
-                resetGridView();
+                // Dọn dẹp giỏ hàng
+                _orderGridView.Clear();
+                ResetGridView();
             }
             else
             {
-                MessageBox.Show("Lưu đơn hàng thất bại: " + order.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lưu đơn hàng thất bại: " + orderResult.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
         {
-            if (dataGridView1.CurrentRow != null && dataGridView1.CurrentRow.Index >= 0 && dataGridView1.CurrentRow.Index < orderGridView.Count)
+            if (dataGridView1.CurrentRow != null &&
+                dataGridView1.CurrentRow.Index >= 0 &&
+                dataGridView1.CurrentRow.Index < _orderGridView.Count)
             {
-                var item = orderGridView[dataGridView1.CurrentRow.Index];
+                var item = _orderGridView[dataGridView1.CurrentRow.Index];
                 textBProductCode.Text = item.ProductId.ToString();
                 textBoxQuanity.Text = item.Quantity.ToString();
             }
@@ -370,5 +287,15 @@ namespace DoAn1.Forms
 
         #endregion
 
+        #region --- HELPER METHODS ---
+
+        private bool ShowValidationError(string message, Control controlToFocus)
+        {
+            MessageBox.Show(message, "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            controlToFocus?.Focus();
+            return false;
+        }
+
+        #endregion
     }
 }

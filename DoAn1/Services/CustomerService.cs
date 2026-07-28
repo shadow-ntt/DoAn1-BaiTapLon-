@@ -57,10 +57,30 @@ namespace DoAn1.Clonee.Services
             {
                 using (var db = new AppDbContext())
                 {
+                    // 0. Bắt sự kiện trùng CCCD (IdentityNumber) hoặc Số điện thoại (PhoneNumber)
+                    bool isIdentityExist = db.Customers.Any(c => c.IdentityNumber == newCustomer.IdentityNumber);
+                    if (isIdentityExist)
+                    {
+                        return new ProcessResult<Customer>
+                        {
+                            IsSuccess = false,
+                            Message = "Số CCCD/CMND này đã tồn tại trong hệ thống!"
+                        };
+                    }
+
+                    bool isPhoneExist = db.Customers.Any(c => c.PhoneNumber == newCustomer.PhoneNumber);
+                    if (isPhoneExist)
+                    {
+                        return new ProcessResult<Customer>
+                        {
+                            IsSuccess = false,
+                            Message = "Số điện thoại này đã tồn tại trong hệ thống!"
+                        };
+                    }
+
                     // 1. Tìm tất cả nhân viên có vai trò là Kiểm soát viên (KSV)
-                    // LƯU Ý: Thay "Role" hoặc "ChucVu" bằng tên trường phân quyền trong bảng Employee của mày
                     var ksvList = db.Employees
-                                    .Where(e => e.Position == "KiemSoatVien" )
+                                    .Where(e => e.Position == "KiemSoatVien")
                                     .ToList();
 
                     if (ksvList.Count > 0)
@@ -70,12 +90,11 @@ namespace DoAn1.Clonee.Services
                         var selectedKsv = ksvList[random.Next(ksvList.Count)];
 
                         // 3. Gán ID của KSV đó vào trường ngoại khóa của Khách hàng mới
-                        // LƯU Ý: Thay "EmployeeId" bằng tên cột khóa ngoại KSV trong bảng Customer của mày nhé
                         newCustomer.EmployeeId = selectedKsv.EmployeeId;
                     }
                     else
                     {
-                        // Nếu DB chưa có ông KSV nào, ném ra thông báo để đi tạo KSV trước đã
+                        // Nếu DB chưa có ông KSV nào
                         return new ProcessResult<Customer>
                         {
                             IsSuccess = false,
@@ -91,7 +110,7 @@ namespace DoAn1.Clonee.Services
                     {
                         IsSuccess = true,
                         Data = newCustomer,
-                        Message = $"Thêm khách hàng thành công! Đã tự động phân công KSV phụ trách."
+                        Message = "Thêm khách hàng thành công! Đã tự động phân công KSV phụ trách."
                     };
                 }
             }
@@ -100,7 +119,7 @@ namespace DoAn1.Clonee.Services
                 return new ProcessResult<Customer>
                 {
                     IsSuccess = false,
-                    Message = "Lỗi hệ thống."
+                    Message = "Lỗi hệ thống: " + ex.Message
                 };
             }
         }

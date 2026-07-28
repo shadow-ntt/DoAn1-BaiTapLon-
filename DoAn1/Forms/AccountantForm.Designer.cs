@@ -118,6 +118,7 @@ namespace DoAn1.Forms
             tabControlAccountant.Size = new Size(1438, 1052);
             tabControlAccountant.SizeMode = TabSizeMode.Fixed;
             tabControlAccountant.TabIndex = 0;
+            tabControlAccountant.SelectedIndexChanged += TabControlAccountant_SelectedIndexChanged;
             // 
             // tabInvoice
             // 
@@ -252,6 +253,7 @@ namespace DoAn1.Forms
             btnPrintInvoice.TabIndex = 4;
             btnPrintInvoice.Text = "XUẤT FILE HÓA ĐƠN (.DOCX)";
             btnPrintInvoice.UseVisualStyleBackColor = false;
+            btnPrintInvoice.Click += BtnPrintInvoice_Click;
             // 
             // btnPrintPackingSlip
             // 
@@ -268,6 +270,7 @@ namespace DoAn1.Forms
             btnPrintPackingSlip.TabIndex = 5;
             btnPrintPackingSlip.Text = "XUẤT FILE TỜ KHAI KIỆN HÀNG (.DOCX)";
             btnPrintPackingSlip.UseVisualStyleBackColor = false;
+            btnPrintPackingSlip.Click += BtnPrintPackingSlip_Click;
             // 
             // btnCreateInvoice
             // 
@@ -285,6 +288,7 @@ namespace DoAn1.Forms
             btnCreateInvoice.TabIndex = 6;
             btnCreateInvoice.Text = "HOÀN THÀNH LẬP HÓA ĐƠN & TỜ KHAI";
             btnCreateInvoice.UseVisualStyleBackColor = false;
+            btnCreateInvoice.Click += BtnCreateInvoice_Click;
             // 
             // txtOrderDate
             // 
@@ -371,6 +375,7 @@ namespace DoAn1.Forms
             lstApprovedOrders.Name = "lstApprovedOrders";
             lstApprovedOrders.Size = new Size(382, 876);
             lstApprovedOrders.TabIndex = 1;
+            lstApprovedOrders.SelectedIndexChanged += LstApprovedOrders_SelectedIndexChanged;
             // 
             // pnlInvoiceHeader
             // 
@@ -409,6 +414,7 @@ namespace DoAn1.Forms
             btnRefreshInvoice.TabIndex = 1;
             btnRefreshInvoice.Text = "TẢI LẠI";
             btnRefreshInvoice.UseVisualStyleBackColor = false;
+            btnRefreshInvoice.Click += BtnRefreshInvoice_Click;
             // 
             // lblListHeader
             // 
@@ -700,6 +706,7 @@ namespace DoAn1.Forms
             btnRefreshRevenue.TabIndex = 7;
             btnRefreshRevenue.Text = "TẢI LẠI";
             btnRefreshRevenue.UseVisualStyleBackColor = false;
+            btnRefreshRevenue.Click += BtnRefreshRevenue_Click;
             // 
             // btnExportExcel
             // 
@@ -715,6 +722,7 @@ namespace DoAn1.Forms
             btnExportExcel.TabIndex = 8;
             btnExportExcel.Text = "XUẤT REPORT";
             btnExportExcel.UseVisualStyleBackColor = false;
+            btnExportExcel.Click += BtnExportExcel_Click;
             // 
             // btnFilterRevenue
             // 
@@ -730,6 +738,7 @@ namespace DoAn1.Forms
             btnFilterRevenue.TabIndex = 6;
             btnFilterRevenue.Text = "LỌC DỮ LIỆU";
             btnFilterRevenue.UseVisualStyleBackColor = false;
+            btnFilterRevenue.Click += BtnFilterRevenue_Click;
             // 
             // txtSearchRevenue
             // 
@@ -739,6 +748,7 @@ namespace DoAn1.Forms
             txtSearchRevenue.Name = "txtSearchRevenue";
             txtSearchRevenue.Size = new Size(290, 30);
             txtSearchRevenue.TabIndex = 5;
+            txtSearchRevenue.TextChanged += TxtSearchRevenue_TextChanged;
             // 
             // lblSearchRevenue
             // 
@@ -804,6 +814,7 @@ namespace DoAn1.Forms
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Kế Toán LAVITA - Quản Lý Hóa Đơn & Doanh Thu";
             WindowState = FormWindowState.Maximized;
+            Load += AccountantForm_Load;
             tabControlAccountant.ResumeLayout(false);
             tabInvoice.ResumeLayout(false);
             pnlDetails.ResumeLayout(false);

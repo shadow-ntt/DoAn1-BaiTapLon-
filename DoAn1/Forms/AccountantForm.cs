@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Text;
 using ClosedXML.Excel;
 using DoAn1.Models.Tables;
 using DoAn1.Models.Helpers;
@@ -26,28 +19,6 @@ namespace DoAn1.Forms
             _accountantService = new AccountantService();
             _approvedOrders = new List<Order>();
             _currentRevenueList = new List<RevenueReportDTO>();
-
-            RegisterFormEvents();
-        }
-
-        private void RegisterFormEvents()
-        {
-            // 1. Sự kiện Form Load & Tab Change
-            this.Load += AccountantForm_Load;
-            tabControlAccountant.SelectedIndexChanged += TabControlAccountant_SelectedIndexChanged;
-
-            // 2. Sự kiện Tab 1: Lập hóa đơn & Tờ khai
-            btnRefreshInvoice.Click += BtnRefreshInvoice_Click;
-            lstApprovedOrders.SelectedIndexChanged += LstApprovedOrders_SelectedIndexChanged;
-            btnPrintInvoice.Click += BtnPrintInvoice_Click;
-            btnPrintPackingSlip.Click += BtnPrintPackingSlip_Click;
-            btnCreateInvoice.Click += BtnCreateInvoice_Click;
-
-            // 3. Sự kiện Tab 2: Doanh thu
-            btnRefreshRevenue.Click += BtnRefreshRevenue_Click;
-            btnFilterRevenue.Click += BtnFilterRevenue_Click;
-            btnExportExcel.Click += BtnExportExcel_Click;
-            txtSearchRevenue.TextChanged += TxtSearchRevenue_TextChanged;
         }
 
         #region --- 1. SỰ KIỆN CHUNG & TỰ ĐỘNG REFRESH ---
