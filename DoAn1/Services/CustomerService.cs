@@ -29,26 +29,50 @@ namespace DoAn1.Clonee.Services
         {
             try
             {
+                // 1. Tìm khách hàng cần sửa
                 Customer customer = db.Customers.Find(id);
-                if (customer != null)
+                if (customer == null)
                 {
-                    customer.IdentityNumber = newCustomer.IdentityNumber;
-                    customer.FullName = newCustomer.FullName;
-                    customer.Address = newCustomer.Address;
-                    customer.City = newCustomer.City;
-                    customer.PhoneNumber = newCustomer.PhoneNumber;
-                    customer.PostalCode = newCustomer.PostalCode;
-                    customer.CreditLimit = newCustomer.CreditLimit;
-                    customer.TaxCode = newCustomer.TaxCode;
-                    db.SaveChanges();
-                    return new ProcessResult<Customer> { IsSuccess = true, Message = "Sửa dữ liệu thành công.", Data=customer };
+                    return new ProcessResult<Customer> { IsSuccess = false, Message = "Không tìm thấy khách hàng." };
                 }
 
-                return new ProcessResult<Customer> { IsSuccess = false, Message = "Không tìm thấy khách hàng." };
+                // 2. Kiểm tra trùng CCCD với khách hàng KHIẾN BỞI ID khác
+                bool isIdentityNumberExists = db.Customers.Any(c => c.IdentityNumber == newCustomer.IdentityNumber && c.CustomerId != id);
+
+                if (isIdentityNumberExists)
+                {
+                    return new ProcessResult<Customer>
+                    {
+                        IsSuccess = false,
+                        Message = "Số CCCD/CMND đã tồn tại trong hệ thống."
+                    };
+                }
+
+                // 3. Cập nhật thông tin
+                customer.IdentityNumber = newCustomer.IdentityNumber;
+                customer.FullName = newCustomer.FullName;
+                customer.Address = newCustomer.Address;
+                customer.City = newCustomer.City;
+                customer.PhoneNumber = newCustomer.PhoneNumber;
+                customer.PostalCode = newCustomer.PostalCode;
+                customer.CreditLimit = newCustomer.CreditLimit;
+                customer.TaxCode = newCustomer.TaxCode;
+
+                db.SaveChanges();
+                return new ProcessResult<Customer>
+                {
+                    IsSuccess = true,
+                    Message = "Sửa dữ liệu thành công.",
+                    Data = customer
+                };
             }
             catch (SqlException)
             {
-                return new ProcessResult<Customer> { IsSuccess = false, Message = "Lỗi hệ thống." };
+                return new ProcessResult<Customer> { IsSuccess = false, Message = "Lỗi hệ thống database." };
+            }
+            catch (Exception ex)
+            {
+                return new ProcessResult<Customer> { IsSuccess = false, Message = "Lỗi hệ thống: " + ex.Message };
             }
         }
         public ProcessResult<Customer> AddCustomer(Customer newCustomer)
