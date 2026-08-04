@@ -26,6 +26,8 @@ namespace DoAn1.Forms
             dataGridView1.DataSource = _orderGridView;
 
             ResetGridView();
+
+            this.WindowState = FormWindowState.Maximized;
         }
 
         #region --- QUẢN LÝ KHÁCH HÀNG ---

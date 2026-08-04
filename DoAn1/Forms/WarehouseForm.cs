@@ -12,6 +12,7 @@ namespace DoAn1.Forms
         public WarehouseForm()
         {
             InitializeComponent();
+            this.WindowState = FormWindowState.Maximized;
         }
 
         private void WarehouseForm_Load(object sender, EventArgs e)

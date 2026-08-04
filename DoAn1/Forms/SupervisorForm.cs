@@ -16,6 +16,8 @@ namespace DoAn1.Forms
             _currentEmployeeId = currentEmployeeId;
             _supervisorService = new SupervisorService();
             _currentHistoryList = new List<Order>();
+
+            this.WindowState = FormWindowState.Maximized;
         }
 
         private void supervisorForm_Load(object sender, EventArgs e)

@@ -19,6 +19,7 @@ namespace DoAn1.Forms
             _accountantService = new AccountantService();
             _approvedOrders = new List<Order>();
             _currentRevenueList = new List<RevenueReportDTO>();
+            this.WindowState = FormWindowState.Maximized;
         }
 
         #region --- 1. SỰ KIỆN CHUNG & TỰ ĐỘNG REFRESH ---

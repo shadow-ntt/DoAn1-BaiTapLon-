@@ -20,6 +20,7 @@ namespace DoAn1.Forms
             _deliveryService = new DeliveryService();
             _currentEmployeeId = currentEmployeeId;
             InitEvents();
+            this.WindowState = FormWindowState.Maximized;
         }
 
         private void InitEvents()
