@@ -32,14 +32,33 @@ namespace DoAn1.Views
 
             InitializeComponent();
             InitializeDatePickers();
+            ConfigureViewMode();
             RegisterEvents();
 
-            if (defaultTabIndex >= 0 && defaultTabIndex < tabControlMain.TabCount)
-            {
-                tabControlMain.SelectedIndex = defaultTabIndex;
-            }
-
             LoadInitialData();
+        }
+
+        private void ConfigureViewMode()
+        {
+            tabControlMain.Appearance = TabAppearance.FlatButtons;
+            tabControlMain.ItemSize = new Size(0, 1);
+            tabControlMain.SizeMode = TabSizeMode.Fixed;
+
+            switch (_viewMode)
+            {
+                case 0:
+                    tabControlMain.SelectedTab = tabGeneral;
+                    lblHeader.Text = "BÁO CÁO THỐNG KÊ DOANH THU TỔNG QUAN";
+                    break;
+                case 1:
+                    tabControlMain.SelectedTab = tabCustomer;
+                    lblHeader.Text = "BÁO CÁO DOANH THU THEO KHÁCH HÀNG";
+                    break;
+                case 2:
+                    tabControlMain.SelectedTab = tabProduct;
+                    lblHeader.Text = "BÁO CÁO DOANH THU THEO SẢN PHẨM";
+                    break;
+            }
         }
 
         private void InitializeDatePickers()
