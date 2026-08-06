@@ -46,12 +46,20 @@ namespace DoAn1.Views
             this.btnExportCustExcel = new System.Windows.Forms.Button();
             this.btnFilterCust = new System.Windows.Forms.Button();
             this.txtSearchCust = new System.Windows.Forms.TextBox();
+            this.dtpToDateCust = new System.Windows.Forms.DateTimePicker();
+            this.lblToDateCust = new System.Windows.Forms.Label();
+            this.dtpFromDateCust = new System.Windows.Forms.DateTimePicker();
+            this.lblFromDateCust = new System.Windows.Forms.Label();
             this.tabProduct = new System.Windows.Forms.TabPage();
             this.dgvProductRevenue = new System.Windows.Forms.DataGridView();
             this.panelProdTop = new System.Windows.Forms.Panel();
             this.btnExportProdExcel = new System.Windows.Forms.Button();
             this.btnFilterProd = new System.Windows.Forms.Button();
             this.txtSearchProd = new System.Windows.Forms.TextBox();
+            this.dtpToDateProd = new System.Windows.Forms.DateTimePicker();
+            this.lblToDateProd = new System.Windows.Forms.Label();
+            this.dtpFromDateProd = new System.Windows.Forms.DateTimePicker();
+            this.lblFromDateProd = new System.Windows.Forms.Label();
 
             this.panelHeader.SuspendLayout();
             this.tabControlMain.SuspendLayout();
@@ -351,6 +359,10 @@ namespace DoAn1.Views
             this.panelCustTop.Controls.Add(this.btnExportCustExcel);
             this.panelCustTop.Controls.Add(this.btnFilterCust);
             this.panelCustTop.Controls.Add(this.txtSearchCust);
+            this.panelCustTop.Controls.Add(this.dtpToDateCust);
+            this.panelCustTop.Controls.Add(this.lblToDateCust);
+            this.panelCustTop.Controls.Add(this.dtpFromDateCust);
+            this.panelCustTop.Controls.Add(this.lblFromDateCust);
             this.panelCustTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelCustTop.Location = new System.Drawing.Point(3, 3);
             this.panelCustTop.Name = "panelCustTop";
@@ -363,10 +375,10 @@ namespace DoAn1.Views
             this.btnExportCustExcel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnExportCustExcel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnExportCustExcel.ForeColor = System.Drawing.Color.White;
-            this.btnExportCustExcel.Location = new System.Drawing.Point(365, 7);
+            this.btnExportCustExcel.Location = new System.Drawing.Point(578, 7);
             this.btnExportCustExcel.Name = "btnExportCustExcel";
-            this.btnExportCustExcel.Size = new System.Drawing.Size(110, 28);
-            this.btnExportCustExcel.TabIndex = 2;
+            this.btnExportCustExcel.Size = new System.Drawing.Size(100, 26);
+            this.btnExportCustExcel.TabIndex = 6;
             this.btnExportCustExcel.Text = "📊 Xuất Excel";
             this.btnExportCustExcel.UseVisualStyleBackColor = false;
             // 
@@ -376,21 +388,57 @@ namespace DoAn1.Views
             this.btnFilterCust.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnFilterCust.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnFilterCust.ForeColor = System.Drawing.Color.White;
-            this.btnFilterCust.Location = new System.Drawing.Point(270, 7);
+            this.btnFilterCust.Location = new System.Drawing.Point(502, 7);
             this.btnFilterCust.Name = "btnFilterCust";
-            this.btnFilterCust.Size = new System.Drawing.Size(85, 28);
-            this.btnFilterCust.TabIndex = 1;
-            this.btnFilterCust.Text = "Lọc KH";
+            this.btnFilterCust.Size = new System.Drawing.Size(70, 26);
+            this.btnFilterCust.TabIndex = 5;
+            this.btnFilterCust.Text = "Lọc";
             this.btnFilterCust.UseVisualStyleBackColor = false;
             // 
             // txtSearchCust
             // 
-            this.txtSearchCust.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.txtSearchCust.Location = new System.Drawing.Point(10, 8);
+            this.txtSearchCust.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtSearchCust.Location = new System.Drawing.Point(345, 8);
             this.txtSearchCust.Name = "txtSearchCust";
-            this.txtSearchCust.PlaceholderText = "Tìm tên khách hàng, MST...";
-            this.txtSearchCust.Size = new System.Drawing.Size(250, 27);
-            this.txtSearchCust.TabIndex = 0;
+            this.txtSearchCust.PlaceholderText = "Tìm tên KH, MST...";
+            this.txtSearchCust.Size = new System.Drawing.Size(150, 23);
+            this.txtSearchCust.TabIndex = 4;
+            // 
+            // dtpToDateCust
+            // 
+            this.dtpToDateCust.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.dtpToDateCust.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpToDateCust.Location = new System.Drawing.Point(223, 8);
+            this.dtpToDateCust.Name = "dtpToDateCust";
+            this.dtpToDateCust.Size = new System.Drawing.Size(115, 23);
+            this.dtpToDateCust.TabIndex = 3;
+            // 
+            // lblToDateCust
+            // 
+            this.lblToDateCust.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblToDateCust.Location = new System.Drawing.Point(188, 11);
+            this.lblToDateCust.Name = "lblToDateCust";
+            this.lblToDateCust.Size = new System.Drawing.Size(35, 22);
+            this.lblToDateCust.TabIndex = 2;
+            this.lblToDateCust.Text = "Đến:";
+            // 
+            // dtpFromDateCust
+            // 
+            this.dtpFromDateCust.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.dtpFromDateCust.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpFromDateCust.Location = new System.Drawing.Point(65, 8);
+            this.dtpFromDateCust.Name = "dtpFromDateCust";
+            this.dtpFromDateCust.Size = new System.Drawing.Size(115, 23);
+            this.dtpFromDateCust.TabIndex = 1;
+            // 
+            // lblFromDateCust
+            // 
+            this.lblFromDateCust.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblFromDateCust.Location = new System.Drawing.Point(10, 11);
+            this.lblFromDateCust.Name = "lblFromDateCust";
+            this.lblFromDateCust.Size = new System.Drawing.Size(55, 22);
+            this.lblFromDateCust.TabIndex = 0;
+            this.lblFromDateCust.Text = "Từ ngày:";
             // 
             // tabProduct
             // 
@@ -422,6 +470,10 @@ namespace DoAn1.Views
             this.panelProdTop.Controls.Add(this.btnExportProdExcel);
             this.panelProdTop.Controls.Add(this.btnFilterProd);
             this.panelProdTop.Controls.Add(this.txtSearchProd);
+            this.panelProdTop.Controls.Add(this.dtpToDateProd);
+            this.panelProdTop.Controls.Add(this.lblToDateProd);
+            this.panelProdTop.Controls.Add(this.dtpFromDateProd);
+            this.panelProdTop.Controls.Add(this.lblFromDateProd);
             this.panelProdTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelProdTop.Location = new System.Drawing.Point(3, 3);
             this.panelProdTop.Name = "panelProdTop";
@@ -434,10 +486,10 @@ namespace DoAn1.Views
             this.btnExportProdExcel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnExportProdExcel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnExportProdExcel.ForeColor = System.Drawing.Color.White;
-            this.btnExportProdExcel.Location = new System.Drawing.Point(365, 7);
+            this.btnExportProdExcel.Location = new System.Drawing.Point(578, 7);
             this.btnExportProdExcel.Name = "btnExportProdExcel";
-            this.btnExportProdExcel.Size = new System.Drawing.Size(110, 28);
-            this.btnExportProdExcel.TabIndex = 2;
+            this.btnExportProdExcel.Size = new System.Drawing.Size(100, 26);
+            this.btnExportProdExcel.TabIndex = 6;
             this.btnExportProdExcel.Text = "📊 Xuất Excel";
             this.btnExportProdExcel.UseVisualStyleBackColor = false;
             // 
@@ -447,21 +499,57 @@ namespace DoAn1.Views
             this.btnFilterProd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnFilterProd.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnFilterProd.ForeColor = System.Drawing.Color.White;
-            this.btnFilterProd.Location = new System.Drawing.Point(270, 7);
+            this.btnFilterProd.Location = new System.Drawing.Point(502, 7);
             this.btnFilterProd.Name = "btnFilterProd";
-            this.btnFilterProd.Size = new System.Drawing.Size(85, 28);
-            this.btnFilterProd.TabIndex = 1;
-            this.btnFilterProd.Text = "Lọc SP";
+            this.btnFilterProd.Size = new System.Drawing.Size(70, 26);
+            this.btnFilterProd.TabIndex = 5;
+            this.btnFilterProd.Text = "Lọc";
             this.btnFilterProd.UseVisualStyleBackColor = false;
             // 
             // txtSearchProd
             // 
-            this.txtSearchProd.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.txtSearchProd.Location = new System.Drawing.Point(10, 8);
+            this.txtSearchProd.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtSearchProd.Location = new System.Drawing.Point(345, 8);
             this.txtSearchProd.Name = "txtSearchProd";
-            this.txtSearchProd.PlaceholderText = "Tìm tên sản phẩm, loại...";
-            this.txtSearchProd.Size = new System.Drawing.Size(250, 27);
-            this.txtSearchProd.TabIndex = 0;
+            this.txtSearchProd.PlaceholderText = "Tìm tên SP, loại...";
+            this.txtSearchProd.Size = new System.Drawing.Size(150, 23);
+            this.txtSearchProd.TabIndex = 4;
+            // 
+            // dtpToDateProd
+            // 
+            this.dtpToDateProd.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.dtpToDateProd.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpToDateProd.Location = new System.Drawing.Point(223, 8);
+            this.dtpToDateProd.Name = "dtpToDateProd";
+            this.dtpToDateProd.Size = new System.Drawing.Size(115, 23);
+            this.dtpToDateProd.TabIndex = 3;
+            // 
+            // lblToDateProd
+            // 
+            this.lblToDateProd.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblToDateProd.Location = new System.Drawing.Point(188, 11);
+            this.lblToDateProd.Name = "lblToDateProd";
+            this.lblToDateProd.Size = new System.Drawing.Size(35, 22);
+            this.lblToDateProd.TabIndex = 2;
+            this.lblToDateProd.Text = "Đến:";
+            // 
+            // dtpFromDateProd
+            // 
+            this.dtpFromDateProd.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.dtpFromDateProd.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpFromDateProd.Location = new System.Drawing.Point(65, 8);
+            this.dtpFromDateProd.Name = "dtpFromDateProd";
+            this.dtpFromDateProd.Size = new System.Drawing.Size(115, 23);
+            this.dtpFromDateProd.TabIndex = 1;
+            // 
+            // lblFromDateProd
+            // 
+            this.lblFromDateProd.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblFromDateProd.Location = new System.Drawing.Point(10, 11);
+            this.lblFromDateProd.Name = "lblFromDateProd";
+            this.lblFromDateProd.Size = new System.Drawing.Size(55, 22);
+            this.lblFromDateProd.TabIndex = 0;
+            this.lblFromDateProd.Text = "Từ ngày:";
             // 
             // RevenueReportControl
             // 
@@ -520,11 +608,19 @@ namespace DoAn1.Views
         private System.Windows.Forms.Label lblCardAvgVal;
         private System.Windows.Forms.DataGridView dgvGeneralRevenue;
         private System.Windows.Forms.Panel panelCustTop;
+        private System.Windows.Forms.Label lblFromDateCust;
+        private System.Windows.Forms.DateTimePicker dtpFromDateCust;
+        private System.Windows.Forms.Label lblToDateCust;
+        private System.Windows.Forms.DateTimePicker dtpToDateCust;
         private System.Windows.Forms.TextBox txtSearchCust;
         private System.Windows.Forms.Button btnFilterCust;
         private System.Windows.Forms.Button btnExportCustExcel;
         private System.Windows.Forms.DataGridView dgvCustomerRevenue;
         private System.Windows.Forms.Panel panelProdTop;
+        private System.Windows.Forms.Label lblFromDateProd;
+        private System.Windows.Forms.DateTimePicker dtpFromDateProd;
+        private System.Windows.Forms.Label lblToDateProd;
+        private System.Windows.Forms.DateTimePicker dtpToDateProd;
         private System.Windows.Forms.TextBox txtSearchProd;
         private System.Windows.Forms.Button btnFilterProd;
         private System.Windows.Forms.Button btnExportProdExcel;

@@ -31,7 +31,7 @@ namespace DoAn1.Views
             _currentProdList = new List<ProductRevenueDTO>();
 
             InitializeComponent();
-
+            InitializeDatePickers();
             RegisterEvents();
 
             if (defaultTabIndex >= 0 && defaultTabIndex < tabControlMain.TabCount)
@@ -40,6 +40,19 @@ namespace DoAn1.Views
             }
 
             LoadInitialData();
+        }
+
+        private void InitializeDatePickers()
+        {
+            DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            if (dtpFromDate != null) dtpFromDate.Value = firstDayOfMonth;
+            if (dtpToDate != null) dtpToDate.Value = DateTime.Now;
+
+            if (dtpFromDateCust != null) dtpFromDateCust.Value = firstDayOfMonth;
+            if (dtpToDateCust != null) dtpToDateCust.Value = DateTime.Now;
+
+            if (dtpFromDateProd != null) dtpFromDateProd.Value = firstDayOfMonth;
+            if (dtpToDateProd != null) dtpToDateProd.Value = DateTime.Now;
         }
 
         private void RegisterEvents()
@@ -58,12 +71,7 @@ namespace DoAn1.Views
 
         private void TabControlMain_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch (tabControlMain.SelectedIndex)
-            {
-                case 0: LoadGeneralRevenue(); break;
-                case 1: LoadCustomerRevenue(); break;
-                case 2: LoadProductRevenue(); break;
-            }
+            LoadInitialData();
         }
 
         private void LoadInitialData()
@@ -114,8 +122,11 @@ namespace DoAn1.Views
 
         private void LoadCustomerRevenue()
         {
+            DateTime? fromDate = dtpFromDateCust != null ? dtpFromDateCust.Value.Date : (DateTime?)null;
+            DateTime? toDate = dtpToDateCust != null ? dtpToDateCust.Value.Date.AddDays(1).AddSeconds(-1) : (DateTime?)null;
             string keyword = txtSearchCust?.Text.Trim() ?? "";
-            _currentCustList = _accountantService.GetRevenueByCustomer(null, null, keyword) ?? new List<CustomerRevenueDTO>();
+
+            _currentCustList = _accountantService.GetRevenueByCustomer(fromDate, toDate, keyword) ?? new List<CustomerRevenueDTO>();
 
             if (dgvCustomerRevenue != null)
             {
@@ -135,8 +146,11 @@ namespace DoAn1.Views
 
         private void LoadProductRevenue()
         {
+            DateTime? fromDate = dtpFromDateProd != null ? dtpFromDateProd.Value.Date : (DateTime?)null;
+            DateTime? toDate = dtpToDateProd != null ? dtpToDateProd.Value.Date.AddDays(1).AddSeconds(-1) : (DateTime?)null;
             string keyword = txtSearchProd?.Text.Trim() ?? "";
-            _currentProdList = _accountantService.GetRevenueByProduct(null, null, keyword) ?? new List<ProductRevenueDTO>();
+
+            _currentProdList = _accountantService.GetRevenueByProduct(fromDate, toDate, keyword) ?? new List<ProductRevenueDTO>();
 
             if (dgvProductRevenue != null)
             {
