@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -20,6 +20,72 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Forms\DashboardForm.Designer.cs">
+      <DependentUpon>DashboardForm.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Views\AccessDeniedControl.Designer.cs">
+      <DependentUpon>AccessDeniedControl.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Views\CustomerManagementControl.Designer.cs">
+      <DependentUpon>CustomerManagementControl.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Views\DeliveryManagementControl.Designer.cs">
+      <DependentUpon>DeliveryManagementControl.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Views\EmployeeManagementControl.Designer.cs">
+      <DependentUpon>EmployeeManagementControl.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Views\InvoiceBillingControl.Designer.cs">
+      <DependentUpon>InvoiceBillingControl.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Views\OrderCreationControl.Designer.cs">
+      <DependentUpon>OrderCreationControl.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Views\OrderInspectionControl.Designer.cs">
+      <DependentUpon>OrderInspectionControl.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Views\ProductManagementControl.Designer.cs">
+      <DependentUpon>ProductManagementControl.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Views\RevenueReportControl.Designer.cs">
+      <DependentUpon>RevenueReportControl.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Forms\DashboardForm.resx">
+      <DependentUpon>DashboardForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\AccessDeniedControl.resx">
+      <DependentUpon>AccessDeniedControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\CustomerManagementControl.resx">
+      <DependentUpon>CustomerManagementControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\DeliveryManagementControl.resx">
+      <DependentUpon>DeliveryManagementControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\EmployeeManagementControl.resx">
+      <DependentUpon>EmployeeManagementControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\InvoiceBillingControl.resx">
+      <DependentUpon>InvoiceBillingControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\OrderCreationControl.resx">
+      <DependentUpon>OrderCreationControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\OrderInspectionControl.resx">
+      <DependentUpon>OrderInspectionControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\ProductManagementControl.resx">
+      <DependentUpon>ProductManagementControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\RevenueReportControl.resx">
+      <DependentUpon>RevenueReportControl.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

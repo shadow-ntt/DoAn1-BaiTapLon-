@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -18,18 +18,23 @@ namespace DoAn1.Services
         }
 
         // 1. LẤY DANH SÁCH ĐƠN HÀNG CHỜ DUYỆT (Status = "Created")
-        public ProcessResult<List<Order>> GetPendingOrders(int currentEmployeeId)
+        public ProcessResult<List<Order>> GetPendingOrders(int currentEmployeeId, bool isAdmin = false)
         {
             try
             {
-                var list = db.Orders
+                var query = db.Orders
                     .Include(o => o.Customer)
                         .ThenInclude(c => c.Employee)
                     .Include(o => o.OrderDetails)
                         .ThenInclude(od => od.Product)
-                    .Where(o => o.Status == "Created" && o.Customer.Employee.EmployeeId == currentEmployeeId)
-                    .OrderByDescending(o => o.OrderDate)
-                    .ToList();
+                    .Where(o => o.Status == "Created");
+
+                if (!isAdmin)
+                {
+                    query = query.Where(o => o.Customer.Employee.EmployeeId == currentEmployeeId);
+                }
+
+                var list = query.OrderByDescending(o => o.OrderDate).ToList();
 
                 return new ProcessResult<List<Order>>
                 {
@@ -43,13 +48,13 @@ namespace DoAn1.Services
                 return new ProcessResult<List<Order>>
                 {
                     IsSuccess = false,
-                    Message = "Lỗi hệ thống."
+                    Message = "Lỗi hệ thống: " + ex.Message
                 };
             }
         }
 
         // 2. LẤY LỊCH SỬ ĐƠN HÀNG ĐÃ KIỂM DUYỆT (Reviewed hoặc Rejected / Cancelled)
-        public ProcessResult<List<Order>> GetReviewedHistoryOrders(int currentEmployeeId, string keyword = "")
+        public ProcessResult<List<Order>> GetReviewedHistoryOrders(int currentEmployeeId, string keyword = "", bool isAdmin = false)
         {
             try
             {
@@ -58,7 +63,12 @@ namespace DoAn1.Services
                         .ThenInclude(c => c.Employee)
                     .Include(o => o.OrderDetails)
                         .ThenInclude(od => od.Product)
-                    .Where(o => o.Status != "Created" && o.Customer.Employee.EmployeeId == currentEmployeeId);
+                    .Where(o => o.Status != "Created");
+
+                if (!isAdmin)
+                {
+                    query = query.Where(o => o.Customer.Employee.EmployeeId == currentEmployeeId);
+                }
 
                 if (!string.IsNullOrWhiteSpace(keyword))
                 {
@@ -81,13 +91,13 @@ namespace DoAn1.Services
                 return new ProcessResult<List<Order>>
                 {
                     IsSuccess = false,
-                    Message = "Lỗi hệ thống."
+                    Message = "Lỗi hệ thống: " + ex.Message
                 };
             }
         }
 
         // 3. PHÊ DUYỆT ĐƠN HÀNG
-        public ProcessResult<Order> ApproveOrder(int orderId)
+        public ProcessResult<Order> ApproveOrder(int orderId, bool forceApprove = false)
         {
             try
             {
@@ -105,21 +115,24 @@ namespace DoAn1.Services
                     };
                 }
 
-                foreach (var detail in order.OrderDetails)
+                if (!forceApprove)
                 {
-                    if (detail.Product.OpeningQuantity < detail.Quantity)
+                    foreach (var detail in order.OrderDetails)
                     {
-                        return new ProcessResult<Order>
+                        if (detail.Product.OpeningQuantity < detail.Quantity)
                         {
-                            IsSuccess = false,
-                            Message = $"Đơn hàng không khả thi! Sản phẩm [{detail.Product.ProductName}] thiếu {detail.Quantity - detail.Product.OpeningQuantity} món."
-                        };
+                            return new ProcessResult<Order>
+                            {
+                                IsSuccess = false,
+                                Message = $"Đơn hàng không khả thi! Sản phẩm [{detail.Product.ProductName}] thiếu {detail.Quantity - detail.Product.OpeningQuantity} món."
+                            };
+                        }
                     }
                 }
 
                 foreach (var detail in order.OrderDetails)
                 {
-                    detail.Product.OpeningQuantity -= detail.Quantity;
+                    detail.Product.OpeningQuantity = Math.Max(0, detail.Product.OpeningQuantity - detail.Quantity);
                 }
 
                 order.Status = "Reviewed";
@@ -139,7 +152,7 @@ namespace DoAn1.Services
                 return new ProcessResult<Order>
                 {
                     IsSuccess = false,
-                    Message = "Lỗi hệ thống."
+                    Message = "Lỗi hệ thống: " + ex.Message
                 };
             }
         }

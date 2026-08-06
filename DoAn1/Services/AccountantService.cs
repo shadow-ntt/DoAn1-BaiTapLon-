@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -127,5 +127,115 @@ namespace DoAn1.Services
                 return result;
             }
         }
+
+        public List<CustomerRevenueDTO> GetRevenueByCustomer(DateTime? fromDate = null, DateTime? toDate = null, string keyword = "")
+        {
+            using (var db = new AppDbContext())
+            {
+                var query = db.Orders
+                    .Include(o => o.Customer)
+                    .Include(o => o.OrderDetails)
+                    .Where(o => o.Status.Trim() == "Completed")
+                    .AsQueryable();
+
+                if (fromDate.HasValue)
+                {
+                    DateTime start = fromDate.Value.Date;
+                    query = query.Where(o => o.OrderDate >= start);
+                }
+
+                if (toDate.HasValue)
+                {
+                    DateTime end = toDate.Value.Date.AddDays(1).AddTicks(-1);
+                    query = query.Where(o => o.OrderDate <= end);
+                }
+
+                if (!string.IsNullOrWhiteSpace(keyword))
+                {
+                    string key = keyword.Trim().ToLower();
+                    query = query.Where(o => o.Customer != null && (o.Customer.FullName.ToLower().Contains(key) || o.Customer.TaxCode.ToLower().Contains(key)));
+                }
+
+                var list = query.ToList()
+                    .GroupBy(o => o.CustomerId)
+                    .Select(g => new CustomerRevenueDTO
+                    {
+                        CustomerId = g.Key,
+                        CustomerName = g.First().Customer?.FullName ?? "Khách hàng vãng lai",
+                        TaxCode = g.First().Customer?.TaxCode ?? "N/A",
+                        City = g.First().Customer?.City ?? "",
+                        OrderCount = g.Count(),
+                        TotalRevenue = g.Sum(o => o.OrderDetails.Sum(od => od.Quantity * od.UnitPrice))
+                    })
+                    .OrderByDescending(c => c.TotalRevenue)
+                    .ToList();
+
+                return list;
+            }
+        }
+
+        public List<ProductRevenueDTO> GetRevenueByProduct(DateTime? fromDate = null, DateTime? toDate = null, string keyword = "")
+        {
+            using (var db = new AppDbContext())
+            {
+                var query = db.OrderDetails
+                    .Include(od => od.Order)
+                    .Include(od => od.Product)
+                    .Where(od => od.Order.Status.Trim() == "Completed")
+                    .AsQueryable();
+
+                if (fromDate.HasValue)
+                {
+                    DateTime start = fromDate.Value.Date;
+                    query = query.Where(od => od.Order.OrderDate >= start);
+                }
+
+                if (toDate.HasValue)
+                {
+                    DateTime end = toDate.Value.Date.AddDays(1).AddTicks(-1);
+                    query = query.Where(od => od.Order.OrderDate <= end);
+                }
+
+                if (!string.IsNullOrWhiteSpace(keyword))
+                {
+                    string key = keyword.Trim().ToLower();
+                    query = query.Where(od => od.Product != null && (od.Product.ProductName.ToLower().Contains(key) || od.Product.Type.ToLower().Contains(key)));
+                }
+
+                var list = query.ToList()
+                    .GroupBy(od => od.ProductId)
+                    .Select(g => new ProductRevenueDTO
+                    {
+                        ProductId = g.Key,
+                        ProductName = g.First().Product?.ProductName ?? "Sản phẩm",
+                        Type = g.First().Product?.Type ?? "",
+                        TotalQuantitySold = g.Sum(od => od.Quantity),
+                        TotalRevenue = g.Sum(od => od.Quantity * od.UnitPrice)
+                    })
+                    .OrderByDescending(p => p.TotalRevenue)
+                    .ToList();
+
+                return list;
+            }
+        }
+    }
+
+    public class CustomerRevenueDTO
+    {
+        public int CustomerId { get; set; }
+        public string CustomerName { get; set; } = string.Empty;
+        public string TaxCode { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public int OrderCount { get; set; }
+        public decimal TotalRevenue { get; set; }
+    }
+
+    public class ProductRevenueDTO
+    {
+        public int ProductId { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public int TotalQuantitySold { get; set; }
+        public decimal TotalRevenue { get; set; }
     }
 }

@@ -37,37 +37,15 @@ namespace DoAn1
 
             if (processResult.IsSuccess)
             {
-                Form? subForm = null;
-
-                switch (processResult.Data.Employee.Position)
-                {
-                    case "GiaoDichVien":
-                        subForm = new EmployeeForm(processResult.Data.EmployeeId);
-                        break;
-                    case "KiemSoatVien":
-                        subForm = new SupervisorForm(processResult.Data.EmployeeId);
-                        break;
-                    case "KeToan":
-                        subForm = new AccountantForm();
-                        break;
-                    case "GiaoHangVien":
-                        subForm = new DeliveryForm(processResult.Data.EmployeeId);
-                        break;
-                    case "KiemKho":
-                        subForm = new WarehouseForm();
-                        break;
-                }
-
-                if (subForm != null)
-                {
-                    // Bắt sự kiện đóng Form phụ -> Thoát toàn bộ ứng dụng
-                    subForm.FormClosed += (s, args) => Application.Exit();
-                    subForm.Show();
-                    this.Hide();
-                }
+                DashboardForm dashboard = new DashboardForm(processResult.Data);
+                dashboard.FormClosed += (s, args) => Application.Exit();
+                dashboard.Show();
+                this.Hide();
             }
-
-            MessageBox.Show(processResult.Message);
+            else
+            {
+                MessageBox.Show(processResult.Message, "Thông báo đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
         private void textBoxPass_KeyDown(object sender, KeyEventArgs e)
         {
