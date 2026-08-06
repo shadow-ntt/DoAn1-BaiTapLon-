@@ -1,4 +1,4 @@
-﻿using DoAn1.Models;
+using DoAn1.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,31 +13,31 @@ namespace DoAn1.Clonee.Services
         public ProcessResult<Account> Login(string acc, string pass)
         {
             try
-            {
-                Account account = db.Accounts.Include(z => z.Employee).FirstOrDefault(z => z.Acc.Equals(acc) && z.Pass.Equals(pass));
-                if (account == null)
                 {
-                    return new ProcessResult<Account>
+                    Account account = db.Accounts.Include(z => z.Employee).FirstOrDefault(z => z.Acc.Equals(acc) && z.Pass.Equals(pass));
+                    if (account == null)
                     {
-                        IsSuccess = false,
-                        Message = "Tài khoản hoặc mật khẩu không đúng.",
-                    };
-                }
-                else
-                {
-                    return new ProcessResult<Account>
+                        return new ProcessResult<Account>
+                        {
+                            IsSuccess = false,
+                            Message = "Tài khoản hoặc mật khẩu không đúng.",
+                        };
+                    }
+                    else
                     {
-                        IsSuccess = true,
-                        Message = "Đăng nhập thành công.",
-                        Data = account
-                    };
+                        return new ProcessResult<Account>
+                        {
+                            IsSuccess = true,
+                            Message = "Đăng nhập thành công.",
+                            Data = account
+                        };
                 }
             }
             catch (Exception ex) {
                 return new ProcessResult<Account>
                 {
                     IsSuccess = false,
-                    Message = "Lỗi hệ thống!"
+                    Message = "Lỗi hệ thống!" + ex.Message
                 };
             }
         }

@@ -13,11 +13,15 @@ namespace DoAn1.Views
     {
         private readonly DeliveryService _deliveryService;
         private readonly int _currentEmployeeId;
-        private readonly int _viewMode; // 0=pending, 1=delivering, 2=history
+        private readonly int _viewMode;
 
         private List<Order> _pendingOrders;
         private List<Delivery> _deliveringOrders;
         private Order _selectedOrder;
+
+        public DeliveryManagementControl() : this(-1, 0)
+        {
+        }
 
         public DeliveryManagementControl(int employeeId = -1, int defaultTabIndex = 0)
         {
@@ -27,19 +31,49 @@ namespace DoAn1.Views
 
             InitializeComponent();
 
-            switch (_viewMode)
+            RegisterEvents();
+
+            if (defaultTabIndex >= 0 && defaultTabIndex < tabControlMain.TabCount)
             {
-                case 0: BuildPendingView(); break;
-                case 1: BuildDeliveringView(); break;
-                case 2: BuildHistoryView(); break;
+                tabControlMain.SelectedIndex = defaultTabIndex;
             }
 
             LoadInitialData();
         }
 
+        private void RegisterEvents()
+        {
+            txtSearchPending.TextChanged += TxtSearchPending_TextChanged;
+            btnRefreshPending.Click += BtnRefreshPending_Click;
+            lstPendingOrders.SelectedIndexChanged += LstPendingOrders_SelectedIndexChanged;
+            btnStartDelivery.Click += BtnStartDelivery_Click;
+
+            txtSearchDelivering.TextChanged += TxtSearchDelivering_TextChanged;
+            btnRefreshDelivering.Click += BtnRefreshDelivering_Click;
+            lstDeliveringOrders.SelectedIndexChanged += LstDeliveringOrders_SelectedIndexChanged;
+            btnConfirmSuccess.Click += BtnConfirmSuccess_Click;
+            btnConfirmReturn.Click += BtnConfirmReturn_Click;
+
+            txtSearchHistory.TextChanged += TxtSearchHistory_TextChanged;
+            btnRefreshHistory.Click += BtnRefreshHistory_Click;
+            dgvHistory.SelectionChanged += DgvHistory_SelectionChanged;
+
+            tabControlMain.SelectedIndexChanged += TabControlMain_SelectedIndexChanged;
+        }
+
+        private void TabControlMain_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (tabControlMain.SelectedIndex)
+            {
+                case 0: LoadPendingOrders(); break;
+                case 1: LoadDeliveringOrders(); break;
+                case 2: LoadDeliveryHistory(); break;
+            }
+        }
+
         private void LoadInitialData()
         {
-            switch (_viewMode)
+            switch (tabControlMain.SelectedIndex)
             {
                 case 0: LoadPendingOrders(); break;
                 case 1: LoadDeliveringOrders(); break;

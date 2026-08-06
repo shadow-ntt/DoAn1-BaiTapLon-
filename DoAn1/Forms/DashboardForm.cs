@@ -1,6 +1,8 @@
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
+using DoAn1.Data;
 using DoAn1.Models.Tables;
 using DoAn1.Views;
 
@@ -13,21 +15,53 @@ namespace DoAn1.Forms
         private readonly string _currentPosition;
         private readonly string _employeeName;
 
+        public DashboardForm() : this(new Account { EmployeeId = 1, Employee = new Employee { Name = "Admin", Position = "Admin" } })
+        {
+        }
+
         public DashboardForm(Account account)
         {
             InitializeComponent();
-            _currentAccount = account;
-            _currentEmployeeId = account.EmployeeId;
-            _currentPosition = account.Employee?.Position ?? "Admin";
-            _employeeName = account.Employee?.Name ?? "Nhân viên";
+            _currentAccount = account ?? new Account { EmployeeId = 1, Employee = new Employee { Name = "Admin", Position = "Admin" } };
+            _currentEmployeeId = _currentAccount.EmployeeId;
+
+            if (_currentAccount.Employee == null && _currentEmployeeId > 0)
+            {
+                try
+                {
+                    using (var db = new AppDbContext())
+                    {
+                        _currentAccount.Employee = db.Employees.FirstOrDefault(e => e.EmployeeId == _currentEmployeeId);
+                    }
+                }
+                catch { }
+            }
+
+            _currentPosition = _currentAccount.Employee?.Position ?? "Admin";
+            _employeeName = _currentAccount.Employee?.Name ?? "Nhân viên";
 
             this.Load += DashboardForm_Load;
+        }
+
+        private static string GetFriendlyRoleName(string position)
+        {
+            if (string.IsNullOrWhiteSpace(position)) return "Chưa xác định";
+            return position.Trim() switch
+            {
+                "Admin" => "Quản trị viên",
+                "GiaoDichVien" => "Giao dịch viên",
+                "KiemSoatVien" => "Kiểm soát viên",
+                "KeToan" => "Kế toán",
+                "GiaoHangVien" => "Giao hàng viên",
+                "KiemKho" => "Kiểm kho",
+                _ => position
+            };
         }
 
         private void DashboardForm_Load(object sender, EventArgs e)
         {
             lblUserInfo.Text = $"Xin chào, {_employeeName} (ID: #{_currentEmployeeId})";
-            lblRoleBadge.Text = $"CHỨC VỤ: {_currentPosition.ToUpper()}";
+            lblRoleBadge.Text = $"CHỨC VỤ: {GetFriendlyRoleName(_currentPosition).ToUpper()}";
 
             BuildTreeView();
             SelectFirstAuthorizedNode();

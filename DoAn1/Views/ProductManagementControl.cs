@@ -14,6 +14,10 @@ namespace DoAn1.Views
         private readonly int _defaultTabIndex;
         private int _selectedProductId = 0;
 
+        public ProductManagementControl() : this("KiemKho", 0)
+        {
+        }
+
         public ProductManagementControl(string position = "KiemKho", int defaultTabIndex = 0)
         {
             _productService = new ProductService();
@@ -23,6 +27,7 @@ namespace DoAn1.Views
             InitializeComponent();
             ConfigureViewMode();
             ApplyRolePermissions();
+            SetTableFontToRegular();
 
             if (_defaultTabIndex == 0)
             {
@@ -31,6 +36,26 @@ namespace DoAn1.Views
             else
             {
                 LoadReturnOrders();
+            }
+        }
+
+        private void SetTableFontToRegular()
+        {
+            Font regularFont = new Font("Segoe UI", 9.5F, FontStyle.Regular);
+            if (dgvProducts != null)
+            {
+                dgvProducts.DefaultCellStyle.Font = regularFont;
+                dgvProducts.RowsDefaultCellStyle.Font = regularFont;
+            }
+            if (dgvReturnOrders != null)
+            {
+                dgvReturnOrders.DefaultCellStyle.Font = regularFont;
+                dgvReturnOrders.RowsDefaultCellStyle.Font = regularFont;
+            }
+            if (dgvReturnDetails != null)
+            {
+                dgvReturnDetails.DefaultCellStyle.Font = regularFont;
+                dgvReturnDetails.RowsDefaultCellStyle.Font = regularFont;
             }
         }
 
