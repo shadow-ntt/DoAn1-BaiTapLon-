@@ -24,6 +24,10 @@ namespace DoAn1.Views
         private readonly bool _isAdmin;
         private Order _selectedOrder;
 
+        public OrderInspectionControl() : this(1, false)
+        {
+        }
+
         public OrderInspectionControl(int employeeId = 1, bool isAdmin = false)
         {
             _supervisorService = new SupervisorService();

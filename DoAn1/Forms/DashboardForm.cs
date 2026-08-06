@@ -13,13 +13,17 @@ namespace DoAn1.Forms
         private readonly string _currentPosition;
         private readonly string _employeeName;
 
+        public DashboardForm() : this(new Account { EmployeeId = 1, Employee = new Employee { Name = "Admin", Position = "Admin" } })
+        {
+        }
+
         public DashboardForm(Account account)
         {
             InitializeComponent();
-            _currentAccount = account;
-            _currentEmployeeId = account.EmployeeId;
-            _currentPosition = account.Employee?.Position ?? "Admin";
-            _employeeName = account.Employee?.Name ?? "Nhân viên";
+            _currentAccount = account ?? new Account { EmployeeId = 1, Employee = new Employee { Name = "Admin", Position = "Admin" } };
+            _currentEmployeeId = _currentAccount.EmployeeId;
+            _currentPosition = _currentAccount.Employee?.Position ?? "Admin";
+            _employeeName = _currentAccount.Employee?.Name ?? "Nhân viên";
 
             this.Load += DashboardForm_Load;
         }

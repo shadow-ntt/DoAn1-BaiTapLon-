@@ -14,6 +14,10 @@ namespace DoAn1.Views
         private readonly int _defaultTabIndex;
         private int _selectedProductId = 0;
 
+        public ProductManagementControl() : this("KiemKho", 0)
+        {
+        }
+
         public ProductManagementControl(string position = "KiemKho", int defaultTabIndex = 0)
         {
             _productService = new ProductService();
