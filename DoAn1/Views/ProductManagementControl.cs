@@ -14,6 +14,16 @@ namespace DoAn1.Views
         private readonly int _defaultTabIndex;
         private int _selectedProductId = 0;
 
+        private System.Windows.Forms.Timer _colorTimer;
+        private int _colorIndex = 0;
+        private readonly Color[] _rainbowColors = new Color[]
+        {
+            Color.Blue,             // Xanh
+            Color.Red,              // Đỏ
+            Color.Purple,           // Tím
+            Color.DarkGoldenrod     // Vàng
+        };
+
         public ProductManagementControl() : this("KiemKho", 0)
         {
         }
@@ -27,6 +37,7 @@ namespace DoAn1.Views
             InitializeComponent();
             ConfigureViewMode();
             ApplyRolePermissions();
+            StartColorAnimation();
 
             if (_defaultTabIndex == 0)
             {
@@ -35,6 +46,39 @@ namespace DoAn1.Views
             else
             {
                 LoadReturnOrders();
+            }
+        }
+
+        private void StartColorAnimation()
+        {
+            _colorTimer = new System.Windows.Forms.Timer();
+            _colorTimer.Interval = 400;
+            _colorTimer.Tick += (s, e) =>
+            {
+                _colorIndex = (_colorIndex + 1) % _rainbowColors.Length;
+                ApplyRainbowColors(dgvProducts);
+                ApplyRainbowColors(dgvReturnOrders);
+                ApplyRainbowColors(dgvReturnDetails);
+            };
+            _colorTimer.Start();
+        }
+
+        private void ApplyRainbowColors(DataGridView dgv)
+        {
+            if (dgv == null || dgv.Rows.Count == 0) return;
+
+            Font regularFont = new Font("Segoe UI", 9.5F, FontStyle.Regular);
+            dgv.DefaultCellStyle.Font = regularFont;
+
+            for (int i = 0; i < dgv.Rows.Count; i++)
+            {
+                var row = dgv.Rows[i];
+                if (!row.IsNewRow)
+                {
+                    int colorOffset = (_colorIndex + i) % _rainbowColors.Length;
+                    row.DefaultCellStyle.ForeColor = _rainbowColors[colorOffset];
+                    row.DefaultCellStyle.Font = regularFont;
+                }
             }
         }
 
@@ -110,6 +154,8 @@ namespace DoAn1.Views
                 }
                 if (dgvProducts.Columns["OpeningQuantity"] != null) dgvProducts.Columns["OpeningQuantity"].HeaderText = "Tồn Kho";
                 if (dgvProducts.Columns["Description"] != null) dgvProducts.Columns["Description"].HeaderText = "Mô Tả";
+
+                ApplyRainbowColors(dgvProducts);
             }
             else
             {
@@ -252,6 +298,8 @@ namespace DoAn1.Views
                 if (dgvReturnOrders.Columns["OrderDate"] != null) dgvReturnOrders.Columns["OrderDate"].HeaderText = "Ngày Đặt";
                 if (dgvReturnOrders.Columns["InvoiceDate"] != null) dgvReturnOrders.Columns["InvoiceDate"].HeaderText = "Ngày Lập HĐ";
                 if (dgvReturnOrders.Columns["Status"] != null) dgvReturnOrders.Columns["Status"].HeaderText = "Trạng Thái";
+
+                ApplyRainbowColors(dgvReturnOrders);
             }
         }
 
@@ -272,6 +320,8 @@ namespace DoAn1.Views
                     if (dgvReturnDetails.Columns["ProductName"] != null) dgvReturnDetails.Columns["ProductName"].HeaderText = "Tên Sản Phẩm";
                     if (dgvReturnDetails.Columns["Quantity"] != null) dgvReturnDetails.Columns["Quantity"].HeaderText = "SL Nhập Lại Kho";
                     if (dgvReturnDetails.Columns["UnitPrice"] != null) dgvReturnDetails.Columns["UnitPrice"].HeaderText = "Đơn Giá";
+
+                    ApplyRainbowColors(dgvReturnDetails);
                 }
 
                 btnApproveReturn.Tag = order.OrderId;
