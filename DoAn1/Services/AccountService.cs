@@ -9,28 +9,30 @@ namespace DoAn1.Clonee.Services
 {
     public class AccountService
     {
-        private static AppDbContext db = new AppDbContext();
         public ProcessResult<Account> Login(string acc, string pass)
         {
             try
             {
-                Account account = db.Accounts.Include(z => z.Employee).FirstOrDefault(z => z.Acc.Equals(acc) && z.Pass.Equals(pass));
-                if (account == null)
+                using (var db = new AppDbContext())
                 {
-                    return new ProcessResult<Account>
+                    Account account = db.Accounts.Include(z => z.Employee).FirstOrDefault(z => z.Acc.Equals(acc) && z.Pass.Equals(pass));
+                    if (account == null)
                     {
-                        IsSuccess = false,
-                        Message = "Tài khoản hoặc mật khẩu không đúng.",
-                    };
-                }
-                else
-                {
-                    return new ProcessResult<Account>
+                        return new ProcessResult<Account>
+                        {
+                            IsSuccess = false,
+                            Message = "Tài khoản hoặc mật khẩu không đúng.",
+                        };
+                    }
+                    else
                     {
-                        IsSuccess = true,
-                        Message = "Đăng nhập thành công.",
-                        Data = account
-                    };
+                        return new ProcessResult<Account>
+                        {
+                            IsSuccess = true,
+                            Message = "Đăng nhập thành công.",
+                            Data = account
+                        };
+                    }
                 }
             }
             catch (Exception ex) {

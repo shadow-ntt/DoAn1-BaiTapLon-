@@ -78,7 +78,7 @@ namespace DoAn1.Forms
             this.lblRoleBadge.ForeColor = System.Drawing.Color.White;
             this.lblRoleBadge.Location = new System.Drawing.Point(360, 15);
             this.lblRoleBadge.Name = "lblRoleBadge";
-            this.lblRoleBadge.Size = new System.Drawing.Size(160, 30);
+            this.lblRoleBadge.Size = new System.Drawing.Size(260, 30);
             this.lblRoleBadge.TabIndex = 1;
             this.lblRoleBadge.Text = "CHỨC VỤ: ADMIN";
             this.lblRoleBadge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
