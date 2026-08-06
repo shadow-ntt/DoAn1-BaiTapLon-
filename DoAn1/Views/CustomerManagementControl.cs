@@ -36,15 +36,18 @@ namespace DoAn1.Views
             var res = _customerService.GetSupervisors();
             if (res.IsSuccess && res.Data != null && res.Data.Count > 0)
             {
-                cbKsv.DataSource = res.Data;
                 cbKsv.DisplayMember = "Name";
                 cbKsv.ValueMember = "EmployeeId";
+                cbKsv.DataSource = res.Data;
             }
             else
             {
-                cbKsv.Items.Add(new Employee { EmployeeId = 1, Name = "Trần Thị B (KSV)" });
                 cbKsv.DisplayMember = "Name";
                 cbKsv.ValueMember = "EmployeeId";
+                cbKsv.DataSource = new List<Employee>
+                {
+                    new Employee { EmployeeId = 1, Name = "Trần Thị B (KSV)" }
+                };
             }
         }
 
@@ -91,19 +94,54 @@ namespace DoAn1.Views
                 txtPostalCode.Text = c.PostalCode ?? "";
                 txtPhone.Text = c.PhoneNumber ?? "";
                 txtTaxCode.Text = c.TaxCode ?? "";
-                txtCreditLimit.Text = c.CreditLimit.ToString("N0");
+                txtCreditLimit.Text = c.CreditLimit.ToString("0"); // Unformatted number to enable clean parsing on Edit
+
                 if (c.EmployeeId > 0 && cbKsv.Items.Count > 0)
                 {
-                    try { cbKsv.SelectedValue = c.EmployeeId; } catch { }
+                    cbKsv.SelectedValue = c.EmployeeId;
+                    if (cbKsv.SelectedIndex < 0 || cbKsv.SelectedValue == null || (cbKsv.SelectedValue is int empId && empId != c.EmployeeId))
+                    {
+                        bool found = false;
+                        for (int i = 0; i < cbKsv.Items.Count; i++)
+                        {
+                            if (cbKsv.Items[i] is Employee emp && emp.EmployeeId == c.EmployeeId)
+                            {
+                                cbKsv.SelectedIndex = i;
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (!found)
+                        {
+                            cbKsv.SelectedIndex = -1;
+                            MessageBox.Show($"Lỗi: Không tìm thấy thông tin KSV phụ trách (Mã KSV #{c.EmployeeId}) cho khách hàng [{c.FullName}] trong danh sách!", "Lỗi KSV phụ trách", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+                else if (c.EmployeeId <= 0)
+                {
+                    cbKsv.SelectedIndex = -1;
+                    MessageBox.Show($"Cảnh báo: Khách hàng [{c.FullName}] chưa được phân công KSV phụ trách!", "Cảnh báo KSV phụ trách", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
+        }
+
+        private int GetSelectedKsvId()
+        {
+            if (cbKsv.SelectedValue is int id && id > 0) return id;
+            if (cbKsv.SelectedItem is Employee emp && emp.EmployeeId > 0) return emp.EmployeeId;
+            return 0;
         }
 
         private void BtnAdd_Click(object sender, EventArgs e)
         {
             if (!ValidateForm()) return;
 
-            int selectedKsvId = (cbKsv.SelectedValue is int id) ? id : 1;
+            int selectedKsvId = GetSelectedKsvId();
+
+            string cleanCredit = txtCreditLimit.Text.Trim().Replace(",", "").Replace(".", "");
+            decimal.TryParse(cleanCredit, out decimal creditLimit);
 
             var newCustomer = new Customer
             {
@@ -114,7 +152,7 @@ namespace DoAn1.Views
                 PostalCode = txtPostalCode.Text.Trim(),
                 PhoneNumber = txtPhone.Text.Trim(),
                 TaxCode = txtTaxCode.Text.Trim(),
-                CreditLimit = decimal.Parse(txtCreditLimit.Text.Trim()),
+                CreditLimit = creditLimit,
                 EmployeeId = selectedKsvId
             };
 
@@ -138,7 +176,10 @@ namespace DoAn1.Views
 
             if (!ValidateForm()) return;
 
-            int selectedKsvId = (cbKsv.SelectedValue is int id) ? id : 1;
+            int selectedKsvId = GetSelectedKsvId();
+
+            string cleanCredit = txtCreditLimit.Text.Trim().Replace(",", "").Replace(".", "");
+            decimal.TryParse(cleanCredit, out decimal creditLimit);
 
             var updatedCustomer = new Customer
             {
@@ -149,7 +190,7 @@ namespace DoAn1.Views
                 PostalCode = txtPostalCode.Text.Trim(),
                 PhoneNumber = txtPhone.Text.Trim(),
                 TaxCode = txtTaxCode.Text.Trim(),
-                CreditLimit = decimal.Parse(txtCreditLimit.Text.Trim()),
+                CreditLimit = creditLimit,
                 EmployeeId = selectedKsvId
             };
 
@@ -195,7 +236,8 @@ namespace DoAn1.Views
             txtPhone.Clear();
             txtTaxCode.Clear();
             txtCreditLimit.Clear();
-            if (cbKsv.Items.Count > 0) cbKsv.SelectedIndex = 0;
+            if (cbKsv.Items.Count > 0) cbKsv.SelectedIndex = -1;
+            dgvCustomers.ClearSelection();
         }
 
         private bool ValidateForm()
@@ -214,10 +256,18 @@ namespace DoAn1.Views
                 return false;
             }
 
-            if (!decimal.TryParse(txtCreditLimit.Text.Trim(), out decimal limit) || limit < 0)
+            string cleanCredit = txtCreditLimit.Text.Trim().Replace(",", "").Replace(".", "");
+            if (!decimal.TryParse(cleanCredit, out decimal limit) || limit < 0)
             {
                 MessageBox.Show("Hạn mức tín dụng phải là số hợp lệ >= 0!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtCreditLimit.Focus();
+                return false;
+            }
+
+            if (GetSelectedKsvId() <= 0)
+            {
+                MessageBox.Show("Vui lòng chọn KSV phụ trách hợp lệ!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                cbKsv.Focus();
                 return false;
             }
 

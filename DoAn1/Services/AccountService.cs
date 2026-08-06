@@ -1,4 +1,4 @@
-﻿using DoAn1.Models;
+using DoAn1.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -37,7 +37,7 @@ namespace DoAn1.Clonee.Services
                 return new ProcessResult<Account>
                 {
                     IsSuccess = false,
-                    Message = "Lỗi hệ thống!"
+                    Message = "Lỗi hệ thống!" + ex.Message
                 };
             }
         }

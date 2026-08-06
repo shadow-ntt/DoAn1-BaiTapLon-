@@ -61,13 +61,13 @@ namespace DoAn1.Clonee.Services
                 using (var localDb = new AppDbContext())
                 {
                     var ksvList = localDb.Employees
-                        .Where(e => e.Position == "KiemSoatVien" || e.DepartmentId == "KSV")
+                        .OrderBy(e => e.EmployeeId)
                         .ToList();
 
                     return new ProcessResult<List<Employee>>
                     {
                         IsSuccess = true,
-                        Message = "Lấy danh sách Kiểm soát viên thành công.",
+                        Message = "Lấy danh sách nhân viên phụ trách thành công.",
                         Data = ksvList
                     };
                 }

@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using DoAn1.Models.Tables;
 using Microsoft.EntityFrameworkCore;
 
