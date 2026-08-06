@@ -9,11 +9,10 @@ namespace DoAn1.Clonee.Services
 {
     public class AccountService
     {
+        private static AppDbContext db = new AppDbContext();
         public ProcessResult<Account> Login(string acc, string pass)
         {
             try
-            {
-                using (var db = new AppDbContext())
                 {
                     Account account = db.Accounts.Include(z => z.Employee).FirstOrDefault(z => z.Acc.Equals(acc) && z.Pass.Equals(pass));
                     if (account == null)
@@ -32,7 +31,6 @@ namespace DoAn1.Clonee.Services
                             Message = "Đăng nhập thành công.",
                             Data = account
                         };
-                    }
                 }
             }
             catch (Exception ex) {
