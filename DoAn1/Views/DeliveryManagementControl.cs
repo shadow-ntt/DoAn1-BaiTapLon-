@@ -30,15 +30,33 @@ namespace DoAn1.Views
             _viewMode = defaultTabIndex;
 
             InitializeComponent();
-
+            ConfigureViewMode();
             RegisterEvents();
 
-            if (defaultTabIndex >= 0 && defaultTabIndex < tabControlMain.TabCount)
-            {
-                tabControlMain.SelectedIndex = defaultTabIndex;
-            }
-
             LoadInitialData();
+        }
+
+        private void ConfigureViewMode()
+        {
+            tabControlMain.Appearance = TabAppearance.FlatButtons;
+            tabControlMain.ItemSize = new Size(0, 1);
+            tabControlMain.SizeMode = TabSizeMode.Fixed;
+
+            switch (_viewMode)
+            {
+                case 0:
+                    if (tabPending != null) tabControlMain.SelectedTab = tabPending;
+                    if (lblHeader != null) lblHeader.Text = "QUẢN LÝ GIAO HÀNG — ĐƠN CHỜ GIAO";
+                    break;
+                case 1:
+                    if (tabDelivering != null) tabControlMain.SelectedTab = tabDelivering;
+                    if (lblHeader != null) lblHeader.Text = "QUẢN LÝ GIAO HÀNG — ĐƠN ĐANG GIAO";
+                    break;
+                case 2:
+                    if (tabHistory != null) tabControlMain.SelectedTab = tabHistory;
+                    if (lblHeader != null) lblHeader.Text = "QUẢN LÝ GIAO HÀNG — LỊCH SỬ GIAO HÀNG";
+                    break;
+            }
         }
 
         private void RegisterEvents()
@@ -65,9 +83,18 @@ namespace DoAn1.Views
         {
             switch (tabControlMain.SelectedIndex)
             {
-                case 0: LoadPendingOrders(); break;
-                case 1: LoadDeliveringOrders(); break;
-                case 2: LoadDeliveryHistory(); break;
+                case 0:
+                    if (lblHeader != null) lblHeader.Text = "QUẢN LÝ GIAO HÀNG — ĐƠN CHỜ GIAO";
+                    LoadPendingOrders();
+                    break;
+                case 1:
+                    if (lblHeader != null) lblHeader.Text = "QUẢN LÝ GIAO HÀNG — ĐƠN ĐANG GIAO";
+                    LoadDeliveringOrders();
+                    break;
+                case 2:
+                    if (lblHeader != null) lblHeader.Text = "QUẢN LÝ GIAO HÀNG — LỊCH SỬ GIAO HÀNG";
+                    LoadDeliveryHistory();
+                    break;
             }
         }
 
