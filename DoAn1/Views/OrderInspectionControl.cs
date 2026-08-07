@@ -9,13 +9,6 @@ using DoAn1.Services;
 
 namespace DoAn1.Views
 {
-    public class OrderDisplayItem
-    {
-        public Order OrderData { get; set; }
-        public string DisplayText { get; set; }
-
-        public override string ToString() => DisplayText;
-    }
 
     public partial class OrderInspectionControl : UserControl
     {
